@@ -16,4 +16,4 @@ haskell-src-exts-simple provides a simplified view of the annotated AST in haske
 
 ## ghc versions
 
-* haskell-src-exts-simple requires ghc-7.10 or later, because it relies on bidirectional pattern synonyms
+* haskell-src-exts-simple requires ghc-7.10 or later, because it relies on explicitly bidirectional pattern synonyms for literals
