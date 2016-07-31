@@ -21,7 +21,7 @@ description:
     > pattern Ident a = H.Ident () a
     > pattern Symbol a = H.Symbol () a
     .
-    See `Language.Haskell.Exts.Simple` for further information.
+    See "Language.Haskell.Exts.Simple" for further information.
 license:             MIT
 license-file:        LICENSE
 author:              Bertram Felgenhauer
@@ -52,7 +52,8 @@ library
         Language.Haskell.Exts.Simple.Syntax
     -- other-modules:       
     other-extensions:
-        PatternSynonyms
+        PatternSynonyms,
+        ScopedTypeVariables
     build-depends:
         base >= 4.8 && < 5,
         haskell-src-exts >= 1.18 && < 1.19

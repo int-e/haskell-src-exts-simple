@@ -1,4 +1,17 @@
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+-- |
+-- This module reexports a simplified view on "Language.Haskell.Exts.Syntax".
+-- The idea is to expose datatypes like
+--
+-- > data Name l = Ident l String | Symbol l String
+--
+-- using ghc's pattern synonyms:
+--
+-- > type Name = H.Name ()
+-- > pattern Ident a = H.Ident () a
+-- > pattern Symbol a = H.Symbol () a
+
 module Language.Haskell.Exts.Simple.Syntax (
     module Language.Haskell.Exts.Simple.Syntax,
     module Language.Haskell.Exts.Syntax
@@ -10,499 +23,598 @@ import Language.Haskell.Exts.Syntax (
     Tool (..),
  )
 
+-- * Datatypes and Constructors
+
+-- ** `H.ModuleName`
 type ModuleName = H.ModuleName ()
-pattern ModuleName a = H.ModuleName () a
+pattern ModuleName a = H.ModuleName () (a :: String) :: ModuleName
 
+-- ** `H.SpecialCon`
 type SpecialCon = H.SpecialCon ()
-pattern UnitCon = H.UnitCon ()
-pattern ListCon = H.ListCon ()
-pattern FunCon = H.FunCon ()
-pattern TupleCon a b = H.TupleCon () a b
-pattern Cons = H.Cons ()
-pattern UnboxedSingleCon = H.UnboxedSingleCon ()
+pattern UnitCon = H.UnitCon () :: SpecialCon
+pattern ListCon = H.ListCon () :: SpecialCon
+pattern FunCon = H.FunCon () :: SpecialCon
+pattern TupleCon a b = H.TupleCon () (a :: Boxed) (b :: Int) :: SpecialCon
+pattern Cons = H.Cons () :: SpecialCon
+pattern UnboxedSingleCon = H.UnboxedSingleCon () :: SpecialCon
 
+-- ** `H.QName`
 type QName = H.QName ()
-pattern Qual a b = H.Qual () a b
-pattern UnQual a = H.UnQual () a
-pattern Special a = H.Special () a
+pattern Qual a b = H.Qual () (a :: ModuleName) (b :: Name) :: QName
+pattern UnQual a = H.UnQual () (a :: Name) :: QName
+pattern Special a = H.Special () (a :: SpecialCon) :: QName
 
+-- ** `H.Name`
 type Name = H.Name ()
-pattern Ident a = H.Ident () a
-pattern Symbol a = H.Symbol () a
+pattern Ident a = H.Ident () (a :: String) :: Name
+pattern Symbol a = H.Symbol () (a :: String) :: Name
 
+-- ** `H.IPName`
 type IPName = H.IPName ()
-pattern IPDup a = H.IPDup () a
-pattern IPLin a = H.IPLin () a
+pattern IPDup a = H.IPDup () (a :: String) :: IPName
+pattern IPLin a = H.IPLin () (a :: String) :: IPName
 
+-- ** `H.QOp`
 type QOp = H.QOp ()
-pattern QVarOp a = H.QVarOp () a
-pattern QConOp a = H.QConOp () a
+pattern QVarOp a = H.QVarOp () (a :: QName) :: QOp
+pattern QConOp a = H.QConOp () (a :: QName) :: QOp
 
+-- ** `H.Op`
 type Op = H.Op ()
-pattern VarOp a = H.VarOp () a
-pattern ConOp a = H.ConOp () a
+pattern VarOp a = H.VarOp () (a :: Name) :: Op
+pattern ConOp a = H.ConOp () (a :: Name) :: Op
 
+-- ** `H.CName`
 type CName = H.CName ()
-pattern VarName a = H.VarName () a
-pattern ConName a = H.ConName () a
+pattern VarName a = H.VarName () (a :: Name) :: CName
+pattern ConName a = H.ConName () (a :: Name) :: CName
 
+-- ** `H.Module`
 type Module = H.Module ()
-pattern Module a b c d = H.Module () a b c d
-pattern XmlPage a b c d e f = H.XmlPage () a b c d e f
-pattern XmlHybrid a b c d e f g h = H.XmlHybrid () a b c d e f g h
+pattern Module a b c d = H.Module () (a :: (Maybe ModuleHead)) (b :: [ModulePragma]) (c :: [ImportDecl]) (d :: [Decl]) :: Module
+pattern XmlPage a b c d e f = H.XmlPage () (a :: ModuleName) (b :: [ModulePragma]) (c :: XName) (d :: [XAttr]) (e :: (Maybe Exp)) (f :: [Exp]) :: Module
+pattern XmlHybrid a b c d e f g h = H.XmlHybrid () (a :: (Maybe ModuleHead)) (b :: [ModulePragma]) (c :: [ImportDecl]) (d :: [Decl]) (e :: XName) (f :: [XAttr]) (g :: (Maybe Exp)) (h :: [Exp]) :: Module
 
+-- ** `H.ModuleHead`
 type ModuleHead = H.ModuleHead ()
-pattern ModuleHead a b c = H.ModuleHead () a b c
+pattern ModuleHead a b c = H.ModuleHead () (a :: ModuleName) (b :: (Maybe WarningText)) (c :: (Maybe ExportSpecList)) :: ModuleHead
 
+-- ** `H.ExportSpecList`
 type ExportSpecList = H.ExportSpecList ()
-pattern ExportSpecList a = H.ExportSpecList () a
+pattern ExportSpecList a = H.ExportSpecList () (a :: [ExportSpec]) :: ExportSpecList
 
+-- ** `H.ExportSpec`
 type ExportSpec = H.ExportSpec ()
-pattern EVar a = H.EVar () a
-pattern EAbs a b = H.EAbs () a b
-pattern EThingWith a b c = H.EThingWith () a b c
-pattern EModuleContents a = H.EModuleContents () a
+pattern EVar a = H.EVar () (a :: QName) :: ExportSpec
+pattern EAbs a b = H.EAbs () (a :: Namespace) (b :: QName) :: ExportSpec
+pattern EThingWith a b c = H.EThingWith () (a :: EWildcard) (b :: QName) (c :: [CName]) :: ExportSpec
+pattern EModuleContents a = H.EModuleContents () (a :: ModuleName) :: ExportSpec
 
+-- ** `H.EWildcard`
 type EWildcard = H.EWildcard ()
-pattern NoWildcard = H.NoWildcard ()
-pattern EWildcard a = H.EWildcard () a
+pattern NoWildcard = H.NoWildcard () :: EWildcard
+pattern EWildcard a = H.EWildcard () (a :: Int) :: EWildcard
 
+-- ** `H.Namespace`
 type Namespace = H.Namespace ()
-pattern NoNamespace = H.NoNamespace ()
-pattern TypeNamespace = H.TypeNamespace ()
-pattern PatternNamespace = H.PatternNamespace ()
+pattern NoNamespace = H.NoNamespace () :: Namespace
+pattern TypeNamespace = H.TypeNamespace () :: Namespace
+pattern PatternNamespace = H.PatternNamespace () :: Namespace
 
+-- ** `H.ImportDecl`
 type ImportDecl = H.ImportDecl ()
-pattern ImportDecl a b c d e f g = H.ImportDecl () a b c d e f g
+-- | Note, this is originally a record constructor, but ghc-7.10 does not support record pattern synonyms. For now, the selectors are exported as functions.
+pattern ImportDecl a b c d e f g = H.ImportDecl () (a :: ModuleName) (b :: Bool) (c :: Bool) (d :: Bool) (e :: Maybe String) (f :: Maybe ModuleName) (g :: Maybe ImportSpecList) :: ImportDecl
+importModule :: ImportDecl -> ModuleName
+importModule = H.importModule
+importQualified :: ImportDecl -> Bool
+importQualified = H.importQualified
+importSrc :: ImportDecl -> Bool
+importSrc = H.importSrc
+importSafe :: ImportDecl -> Bool
+importSafe = H.importSafe
+importPkg :: ImportDecl -> Maybe String
+importPkg = H.importPkg
+importAs :: ImportDecl -> Maybe ModuleName
+importAs = H.importAs
+importSpecs :: ImportDecl -> Maybe ImportSpecList
+importSpecs = H.importSpecs
 
+-- ** `H.ImportSpecList`
 type ImportSpecList = H.ImportSpecList ()
-pattern ImportSpecList a b = H.ImportSpecList () a b
+pattern ImportSpecList a b = H.ImportSpecList () (a :: Bool) (b :: [ImportSpec]) :: ImportSpecList
 
+-- ** `H.ImportSpec`
 type ImportSpec = H.ImportSpec ()
-pattern IVar a = H.IVar () a
-pattern IAbs a b = H.IAbs () a b
-pattern IThingAll a = H.IThingAll () a
-pattern IThingWith a b = H.IThingWith () a b
+pattern IVar a = H.IVar () (a :: Name) :: ImportSpec
+pattern IAbs a b = H.IAbs () (a :: Namespace) (b :: Name) :: ImportSpec
+pattern IThingAll a = H.IThingAll () (a :: Name) :: ImportSpec
+pattern IThingWith a b = H.IThingWith () (a :: Name) (b :: [CName]) :: ImportSpec
 
+-- ** `H.Assoc`
 type Assoc = H.Assoc ()
-pattern AssocNone = H.AssocNone ()
-pattern AssocLeft = H.AssocLeft ()
-pattern AssocRight = H.AssocRight ()
+pattern AssocNone = H.AssocNone () :: Assoc
+pattern AssocLeft = H.AssocLeft () :: Assoc
+pattern AssocRight = H.AssocRight () :: Assoc
 
+-- ** `H.Decl`
 type Decl = H.Decl ()
-pattern TypeDecl a b = H.TypeDecl () a b
-pattern TypeFamDecl a b c = H.TypeFamDecl () a b c
-pattern ClosedTypeFamDecl a b c d = H.ClosedTypeFamDecl () a b c d
-pattern DataDecl a b c d e = H.DataDecl () a b c d e
-pattern GDataDecl a b c d e f = H.GDataDecl () a b c d e f
-pattern DataFamDecl a b c = H.DataFamDecl () a b c
-pattern TypeInsDecl a b = H.TypeInsDecl () a b
-pattern DataInsDecl a b c d = H.DataInsDecl () a b c d
-pattern GDataInsDecl a b c d e = H.GDataInsDecl () a b c d e
-pattern ClassDecl a b c d = H.ClassDecl () a b c d
-pattern InstDecl a b c = H.InstDecl () a b c
-pattern DerivDecl a b = H.DerivDecl () a b
-pattern InfixDecl a b c = H.InfixDecl () a b c
-pattern DefaultDecl a = H.DefaultDecl () a
-pattern SpliceDecl a = H.SpliceDecl () a
-pattern TypeSig a b = H.TypeSig () a b
-pattern PatSynSig a b c d e = H.PatSynSig () a b c d e
-pattern FunBind a = H.FunBind () a
-pattern PatBind a b c = H.PatBind () a b c
-pattern PatSyn a b c = H.PatSyn () a b c
-pattern ForImp a b c d e = H.ForImp () a b c d e
-pattern ForExp a b c d = H.ForExp () a b c d
-pattern RulePragmaDecl a = H.RulePragmaDecl () a
-pattern DeprPragmaDecl a = H.DeprPragmaDecl () a
-pattern WarnPragmaDecl a = H.WarnPragmaDecl () a
-pattern InlineSig a b c = H.InlineSig () a b c
-pattern InlineConlikeSig a b = H.InlineConlikeSig () a b
-pattern SpecSig a b c = H.SpecSig () a b c
-pattern SpecInlineSig a b c d = H.SpecInlineSig () a b c d
-pattern InstSig a = H.InstSig () a
-pattern AnnPragma a = H.AnnPragma () a
-pattern MinimalPragma a = H.MinimalPragma () a
-pattern RoleAnnotDecl a b = H.RoleAnnotDecl () a b
+pattern TypeDecl a b = H.TypeDecl () (a :: DeclHead) (b :: Type) :: Decl
+pattern TypeFamDecl a b c = H.TypeFamDecl () (a :: DeclHead) (b :: (Maybe ResultSig)) (c :: (Maybe InjectivityInfo)) :: Decl
+pattern ClosedTypeFamDecl a b c d = H.ClosedTypeFamDecl () (a :: DeclHead) (b :: (Maybe ResultSig)) (c :: (Maybe InjectivityInfo)) (d :: [TypeEqn]) :: Decl
+pattern DataDecl a b c d e = H.DataDecl () (a :: DataOrNew) (b :: (Maybe Context)) (c :: DeclHead) (d :: [QualConDecl]) (e :: (Maybe Deriving)) :: Decl
+pattern GDataDecl a b c d e f = H.GDataDecl () (a :: DataOrNew) (b :: (Maybe Context)) (c :: DeclHead) (d :: (Maybe Kind)) (e :: [GadtDecl]) (f :: (Maybe Deriving)) :: Decl
+pattern DataFamDecl a b c = H.DataFamDecl () (a :: (Maybe Context)) (b :: DeclHead) (c :: (Maybe ResultSig)) :: Decl
+pattern TypeInsDecl a b = H.TypeInsDecl () (a :: Type) (b :: Type) :: Decl
+pattern DataInsDecl a b c d = H.DataInsDecl () (a :: DataOrNew) (b :: Type) (c :: [QualConDecl]) (d :: (Maybe Deriving)) :: Decl
+pattern GDataInsDecl a b c d e = H.GDataInsDecl () (a :: DataOrNew) (b :: Type) (c :: (Maybe Kind)) (d :: [GadtDecl]) (e :: (Maybe Deriving)) :: Decl
+pattern ClassDecl a b c d = H.ClassDecl () (a :: (Maybe Context)) (b :: DeclHead) (c :: [FunDep]) (d :: (Maybe [ClassDecl])) :: Decl
+pattern InstDecl a b c = H.InstDecl () (a :: (Maybe Overlap)) (b :: InstRule) (c :: (Maybe [InstDecl])) :: Decl
+pattern DerivDecl a b = H.DerivDecl () (a :: (Maybe Overlap)) (b :: InstRule) :: Decl
+pattern InfixDecl a b c = H.InfixDecl () (a :: Assoc) (b :: (Maybe Int)) (c :: [Op]) :: Decl
+pattern DefaultDecl a = H.DefaultDecl () (a :: [Type]) :: Decl
+pattern SpliceDecl a = H.SpliceDecl () (a :: Exp) :: Decl
+pattern TypeSig a b = H.TypeSig () (a :: [Name]) (b :: Type) :: Decl
+pattern PatSynSig a b c d e = H.PatSynSig () (a :: Name) (b :: (Maybe [TyVarBind])) (c :: (Maybe Context)) (d :: (Maybe Context)) (e :: Type) :: Decl
+pattern FunBind a = H.FunBind () (a :: [Match]) :: Decl
+pattern PatBind a b c = H.PatBind () (a :: Pat) (b :: Rhs) (c :: (Maybe Binds)) :: Decl
+pattern PatSyn a b c = H.PatSyn () (a :: Pat) (b :: Pat) (c :: PatternSynDirection) :: Decl
+pattern ForImp a b c d e = H.ForImp () (a :: CallConv) (b :: (Maybe Safety)) (c :: (Maybe String)) (d :: Name) (e :: Type) :: Decl
+pattern ForExp a b c d = H.ForExp () (a :: CallConv) (b :: (Maybe String)) (c :: Name) (d :: Type) :: Decl
+pattern RulePragmaDecl a = H.RulePragmaDecl () (a :: [Rule]) :: Decl
+pattern DeprPragmaDecl a = H.DeprPragmaDecl () (a :: [([Name], String)]) :: Decl
+pattern WarnPragmaDecl a = H.WarnPragmaDecl () (a :: [([Name], String)]) :: Decl
+pattern InlineSig a b c = H.InlineSig () (a :: Bool) (b :: (Maybe Activation)) (c :: QName) :: Decl
+pattern InlineConlikeSig a b = H.InlineConlikeSig () (a :: (Maybe Activation)) (b :: QName) :: Decl
+pattern SpecSig a b c = H.SpecSig () (a :: (Maybe Activation)) (b :: QName) (c :: [Type]) :: Decl
+pattern SpecInlineSig a b c d = H.SpecInlineSig () (a :: Bool) (b :: (Maybe Activation)) (c :: QName) (d :: [Type]) :: Decl
+pattern InstSig a = H.InstSig () (a :: InstRule) :: Decl
+pattern AnnPragma a = H.AnnPragma () (a :: Annotation) :: Decl
+pattern MinimalPragma a = H.MinimalPragma () (a :: (Maybe BooleanFormula)) :: Decl
+pattern RoleAnnotDecl a b = H.RoleAnnotDecl () (a :: QName) (b :: [Role]) :: Decl
 
+-- ** `H.PatternSynDirection`
 type PatternSynDirection = H.PatternSynDirection ()
-pattern Unidirectional  = H.Unidirectional 
-pattern ImplicitBidirectional  = H.ImplicitBidirectional 
-pattern ExplicitBidirectional a = H.ExplicitBidirectional () a
+pattern Unidirectional = H.Unidirectional :: PatternSynDirection
+pattern ImplicitBidirectional = H.ImplicitBidirectional :: PatternSynDirection
+pattern ExplicitBidirectional a = H.ExplicitBidirectional () (a :: [Decl]) :: PatternSynDirection
 
+-- ** `H.TypeEqn`
 type TypeEqn = H.TypeEqn ()
-pattern TypeEqn a b = H.TypeEqn () a b
+pattern TypeEqn a b = H.TypeEqn () (a :: Type) (b :: Type) :: TypeEqn
 
+-- ** `H.Annotation`
 type Annotation = H.Annotation ()
-pattern Ann a b = H.Ann () a b
-pattern TypeAnn a b = H.TypeAnn () a b
-pattern ModuleAnn a = H.ModuleAnn () a
+pattern Ann a b = H.Ann () (a :: Name) (b :: Exp) :: Annotation
+pattern TypeAnn a b = H.TypeAnn () (a :: Name) (b :: Exp) :: Annotation
+pattern ModuleAnn a = H.ModuleAnn () (a :: Exp) :: Annotation
 
+-- ** `H.BooleanFormula`
 type BooleanFormula = H.BooleanFormula ()
-pattern VarFormula a = H.VarFormula () a
-pattern AndFormula a = H.AndFormula () a
-pattern OrFormula a = H.OrFormula () a
-pattern ParenFormula a = H.ParenFormula () a
+pattern VarFormula a = H.VarFormula () (a :: Name) :: BooleanFormula
+pattern AndFormula a = H.AndFormula () (a :: [BooleanFormula]) :: BooleanFormula
+pattern OrFormula a = H.OrFormula () (a :: [BooleanFormula]) :: BooleanFormula
+pattern ParenFormula a = H.ParenFormula () (a :: BooleanFormula) :: BooleanFormula
 
+-- ** `H.Role`
 type Role = H.Role ()
-pattern Nominal = H.Nominal ()
-pattern Representational = H.Representational ()
-pattern Phantom = H.Phantom ()
-pattern RoleWildcard = H.RoleWildcard ()
+pattern Nominal = H.Nominal () :: Role
+pattern Representational = H.Representational () :: Role
+pattern Phantom = H.Phantom () :: Role
+pattern RoleWildcard = H.RoleWildcard () :: Role
 
+-- ** `H.DataOrNew`
 type DataOrNew = H.DataOrNew ()
-pattern DataType = H.DataType ()
-pattern NewType = H.NewType ()
+pattern DataType = H.DataType () :: DataOrNew
+pattern NewType = H.NewType () :: DataOrNew
 
+-- ** `H.InjectivityInfo`
 type InjectivityInfo = H.InjectivityInfo ()
-pattern InjectivityInfo a b = H.InjectivityInfo () a b
+pattern InjectivityInfo a b = H.InjectivityInfo () (a :: Name) (b :: [Name]) :: InjectivityInfo
 
+-- ** `H.ResultSig`
 type ResultSig = H.ResultSig ()
-pattern KindSig a = H.KindSig () a
-pattern TyVarSig a = H.TyVarSig () a
+pattern KindSig a = H.KindSig () (a :: Kind) :: ResultSig
+pattern TyVarSig a = H.TyVarSig () (a :: TyVarBind) :: ResultSig
 
+-- ** `H.DeclHead`
 type DeclHead = H.DeclHead ()
-pattern DHead a = H.DHead () a
-pattern DHInfix a b = H.DHInfix () a b
-pattern DHParen a = H.DHParen () a
-pattern DHApp a b = H.DHApp () a b
+pattern DHead a = H.DHead () (a :: Name) :: DeclHead
+pattern DHInfix a b = H.DHInfix () (a :: TyVarBind) (b :: Name) :: DeclHead
+pattern DHParen a = H.DHParen () (a :: DeclHead) :: DeclHead
+pattern DHApp a b = H.DHApp () (a :: DeclHead) (b :: TyVarBind) :: DeclHead
 
+-- ** `H.InstRule`
 type InstRule = H.InstRule ()
-pattern IRule a b c = H.IRule () a b c
-pattern IParen a = H.IParen () a
+pattern IRule a b c = H.IRule () (a :: (Maybe [TyVarBind])) (b :: (Maybe Context)) (c :: InstHead) :: InstRule
+pattern IParen a = H.IParen () (a :: InstRule) :: InstRule
 
+-- ** `H.InstHead`
 type InstHead = H.InstHead ()
-pattern IHCon a = H.IHCon () a
-pattern IHInfix a b = H.IHInfix () a b
-pattern IHParen a = H.IHParen () a
-pattern IHApp a b = H.IHApp () a b
+pattern IHCon a = H.IHCon () (a :: QName) :: InstHead
+pattern IHInfix a b = H.IHInfix () (a :: Type) (b :: QName) :: InstHead
+pattern IHParen a = H.IHParen () (a :: InstHead) :: InstHead
+pattern IHApp a b = H.IHApp () (a :: InstHead) (b :: Type) :: InstHead
 
+-- ** `H.Deriving`
 type Deriving = H.Deriving ()
-pattern Deriving a = H.Deriving () a
+pattern Deriving a = H.Deriving () (a :: [InstRule]) :: Deriving
 
+-- ** `H.Binds`
 type Binds = H.Binds ()
-pattern BDecls a = H.BDecls () a
-pattern IPBinds a = H.IPBinds () a
+pattern BDecls a = H.BDecls () (a :: [Decl]) :: Binds
+pattern IPBinds a = H.IPBinds () (a :: [IPBind]) :: Binds
 
+-- ** `H.IPBind`
 type IPBind = H.IPBind ()
-pattern IPBind a b = H.IPBind () a b
+pattern IPBind a b = H.IPBind () (a :: IPName) (b :: Exp) :: IPBind
 
+-- ** `H.Match`
 type Match = H.Match ()
-pattern Match a b c d = H.Match () a b c d
-pattern InfixMatch a b c d e = H.InfixMatch () a b c d e
+pattern Match a b c d = H.Match () (a :: Name) (b :: [Pat]) (c :: Rhs) (d :: (Maybe Binds)) :: Match
+pattern InfixMatch a b c d e = H.InfixMatch () (a :: Pat) (b :: Name) (c :: [Pat]) (d :: Rhs) (e :: (Maybe Binds)) :: Match
 
+-- ** `H.QualConDecl`
 type QualConDecl = H.QualConDecl ()
-pattern QualConDecl a b c = H.QualConDecl () a b c
+pattern QualConDecl a b c = H.QualConDecl () (a :: (Maybe [TyVarBind])) (b :: (Maybe Context)) (c :: ConDecl) :: QualConDecl
 
+-- ** `H.ConDecl`
 type ConDecl = H.ConDecl ()
-pattern ConDecl a b = H.ConDecl () a b
-pattern InfixConDecl a b c = H.InfixConDecl () a b c
-pattern RecDecl a b = H.RecDecl () a b
+pattern ConDecl a b = H.ConDecl () (a :: Name) (b :: [Type]) :: ConDecl
+pattern InfixConDecl a b c = H.InfixConDecl () (a :: Type) (b :: Name) (c :: Type) :: ConDecl
+pattern RecDecl a b = H.RecDecl () (a :: Name) (b :: [FieldDecl]) :: ConDecl
 
+-- ** `H.FieldDecl`
 type FieldDecl = H.FieldDecl ()
-pattern FieldDecl a b = H.FieldDecl () a b
+pattern FieldDecl a b = H.FieldDecl () (a :: [Name]) (b :: Type) :: FieldDecl
 
+-- ** `H.GadtDecl`
 type GadtDecl = H.GadtDecl ()
-pattern GadtDecl a b c = H.GadtDecl () a b c
+pattern GadtDecl a b c = H.GadtDecl () (a :: Name) (b :: (Maybe [FieldDecl])) (c :: Type) :: GadtDecl
 
+-- ** `H.ClassDecl`
 type ClassDecl = H.ClassDecl ()
-pattern ClsDecl a = H.ClsDecl () a
-pattern ClsDataFam a b c = H.ClsDataFam () a b c
-pattern ClsTyFam a b c = H.ClsTyFam () a b c
-pattern ClsTyDef a = H.ClsTyDef () a
-pattern ClsDefSig a b = H.ClsDefSig () a b
+pattern ClsDecl a = H.ClsDecl () (a :: Decl) :: ClassDecl
+pattern ClsDataFam a b c = H.ClsDataFam () (a :: (Maybe Context)) (b :: DeclHead) (c :: (Maybe ResultSig)) :: ClassDecl
+pattern ClsTyFam a b c = H.ClsTyFam () (a :: DeclHead) (b :: (Maybe ResultSig)) (c :: (Maybe InjectivityInfo)) :: ClassDecl
+pattern ClsTyDef a = H.ClsTyDef () (a :: TypeEqn) :: ClassDecl
+pattern ClsDefSig a b = H.ClsDefSig () (a :: Name) (b :: Type) :: ClassDecl
 
+-- ** `H.InstDecl`
 type InstDecl = H.InstDecl ()
-pattern InsDecl a = H.InsDecl () a
-pattern InsType a b = H.InsType () a b
-pattern InsData a b c d = H.InsData () a b c d
-pattern InsGData a b c d e = H.InsGData () a b c d e
+pattern InsDecl a = H.InsDecl () (a :: Decl) :: InstDecl
+pattern InsType a b = H.InsType () (a :: Type) (b :: Type) :: InstDecl
+pattern InsData a b c d = H.InsData () (a :: DataOrNew) (b :: Type) (c :: [QualConDecl]) (d :: (Maybe Deriving)) :: InstDecl
+pattern InsGData a b c d e = H.InsGData () (a :: DataOrNew) (b :: Type) (c :: (Maybe Kind)) (d :: [GadtDecl]) (e :: (Maybe Deriving)) :: InstDecl
 
+-- ** `H.BangType`
 type BangType = H.BangType ()
-pattern BangedTy = H.BangedTy ()
-pattern LazyTy = H.LazyTy ()
-pattern NoStrictAnnot = H.NoStrictAnnot ()
+pattern BangedTy = H.BangedTy () :: BangType
+pattern LazyTy = H.LazyTy () :: BangType
+pattern NoStrictAnnot = H.NoStrictAnnot () :: BangType
 
+-- ** `H.Unpackedness`
 type Unpackedness = H.Unpackedness ()
-pattern Unpack = H.Unpack ()
-pattern NoUnpack = H.NoUnpack ()
-pattern NoUnpackPragma = H.NoUnpackPragma ()
+pattern Unpack = H.Unpack () :: Unpackedness
+pattern NoUnpack = H.NoUnpack () :: Unpackedness
+pattern NoUnpackPragma = H.NoUnpackPragma () :: Unpackedness
 
+-- ** `H.Rhs`
 type Rhs = H.Rhs ()
-pattern UnGuardedRhs a = H.UnGuardedRhs () a
-pattern GuardedRhss a = H.GuardedRhss () a
+pattern UnGuardedRhs a = H.UnGuardedRhs () (a :: Exp) :: Rhs
+pattern GuardedRhss a = H.GuardedRhss () (a :: [GuardedRhs]) :: Rhs
 
+-- ** `H.GuardedRhs`
 type GuardedRhs = H.GuardedRhs ()
-pattern GuardedRhs a b = H.GuardedRhs () a b
+pattern GuardedRhs a b = H.GuardedRhs () (a :: [Stmt]) (b :: Exp) :: GuardedRhs
 
+-- ** `H.Type`
 type Type = H.Type ()
-pattern TyForall a b c = H.TyForall () a b c
-pattern TyFun a b = H.TyFun () a b
-pattern TyTuple a b = H.TyTuple () a b
-pattern TyList a = H.TyList () a
-pattern TyParArray a = H.TyParArray () a
-pattern TyApp a b = H.TyApp () a b
-pattern TyVar a = H.TyVar () a
-pattern TyCon a = H.TyCon () a
-pattern TyParen a = H.TyParen () a
-pattern TyInfix a b c = H.TyInfix () a b c
-pattern TyKind a b = H.TyKind () a b
-pattern TyPromoted a = H.TyPromoted () a
-pattern TyEquals a b = H.TyEquals () a b
-pattern TySplice a = H.TySplice () a
-pattern TyBang a b c = H.TyBang () a b c
-pattern TyWildCard a = H.TyWildCard () a
-pattern TyQuasiQuote a b = H.TyQuasiQuote () a b
+pattern TyForall a b c = H.TyForall () (a :: (Maybe [TyVarBind])) (b :: (Maybe Context)) (c :: Type) :: Type
+pattern TyFun a b = H.TyFun () (a :: Type) (b :: Type) :: Type
+pattern TyTuple a b = H.TyTuple () (a :: Boxed) (b :: [Type]) :: Type
+pattern TyList a = H.TyList () (a :: Type) :: Type
+pattern TyParArray a = H.TyParArray () (a :: Type) :: Type
+pattern TyApp a b = H.TyApp () (a :: Type) (b :: Type) :: Type
+pattern TyVar a = H.TyVar () (a :: Name) :: Type
+pattern TyCon a = H.TyCon () (a :: QName) :: Type
+pattern TyParen a = H.TyParen () (a :: Type) :: Type
+pattern TyInfix a b c = H.TyInfix () (a :: Type) (b :: QName) (c :: Type) :: Type
+pattern TyKind a b = H.TyKind () (a :: Type) (b :: Kind) :: Type
+pattern TyPromoted a = H.TyPromoted () (a :: Promoted) :: Type
+pattern TyEquals a b = H.TyEquals () (a :: Type) (b :: Type) :: Type
+pattern TySplice a = H.TySplice () (a :: Splice) :: Type
+pattern TyBang a b c = H.TyBang () (a :: BangType) (b :: Unpackedness) (c :: Type) :: Type
+pattern TyWildCard a = H.TyWildCard () (a :: (Maybe Name)) :: Type
+pattern TyQuasiQuote a b = H.TyQuasiQuote () (a :: String) (b :: String) :: Type
 
+-- ** `H.Promoted`
 type Promoted = H.Promoted ()
-pattern PromotedInteger a b = H.PromotedInteger () a b
-pattern PromotedString a b = H.PromotedString () a b
-pattern PromotedCon a b = H.PromotedCon () a b
-pattern PromotedList a b = H.PromotedList () a b
-pattern PromotedTuple a = H.PromotedTuple () a
-pattern PromotedUnit = H.PromotedUnit ()
+pattern PromotedInteger a b = H.PromotedInteger () (a :: Integer) (b :: String) :: Promoted
+pattern PromotedString a b = H.PromotedString () (a :: String) (b :: String) :: Promoted
+pattern PromotedCon a b = H.PromotedCon () (a :: Bool) (b :: QName) :: Promoted
+pattern PromotedList a b = H.PromotedList () (a :: Bool) (b :: [Type]) :: Promoted
+pattern PromotedTuple a = H.PromotedTuple () (a :: [Type]) :: Promoted
+pattern PromotedUnit = H.PromotedUnit () :: Promoted
 
+-- skipped: data Boxed
+
+-- ** `H.TyVarBind`
 type TyVarBind = H.TyVarBind ()
-pattern KindedVar a b = H.KindedVar () a b
-pattern UnkindedVar a = H.UnkindedVar () a
+pattern KindedVar a b = H.KindedVar () (a :: Name) (b :: Kind) :: TyVarBind
+pattern UnkindedVar a = H.UnkindedVar () (a :: Name) :: TyVarBind
 
+-- ** `H.Kind`
 type Kind = H.Kind ()
-pattern KindStar = H.KindStar ()
-pattern KindFn a b = H.KindFn () a b
-pattern KindParen a = H.KindParen () a
-pattern KindVar a = H.KindVar () a
-pattern KindApp a b = H.KindApp () a b
-pattern KindTuple a = H.KindTuple () a
-pattern KindList a = H.KindList () a
+pattern KindStar = H.KindStar () :: Kind
+pattern KindFn a b = H.KindFn () (a :: Kind) (b :: Kind) :: Kind
+pattern KindParen a = H.KindParen () (a :: Kind) :: Kind
+pattern KindVar a = H.KindVar () (a :: QName) :: Kind
+pattern KindApp a b = H.KindApp () (a :: Kind) (b :: Kind) :: Kind
+pattern KindTuple a = H.KindTuple () (a :: [Kind]) :: Kind
+pattern KindList a = H.KindList () (a :: Kind) :: Kind
 
+-- ** `H.FunDep`
 type FunDep = H.FunDep ()
-pattern FunDep a b = H.FunDep () a b
+pattern FunDep a b = H.FunDep () (a :: [Name]) (b :: [Name]) :: FunDep
 
+-- ** `H.Context`
 type Context = H.Context ()
-pattern CxSingle a = H.CxSingle () a
-pattern CxTuple a = H.CxTuple () a
-pattern CxEmpty = H.CxEmpty ()
+pattern CxSingle a = H.CxSingle () (a :: Asst) :: Context
+pattern CxTuple a = H.CxTuple () (a :: [Asst]) :: Context
+pattern CxEmpty = H.CxEmpty () :: Context
 
+-- ** `H.Asst`
 type Asst = H.Asst ()
-pattern ClassA a b = H.ClassA () a b
-pattern AppA a b = H.AppA () a b
-pattern InfixA a b c = H.InfixA () a b c
-pattern IParam a b = H.IParam () a b
-pattern EqualP a b = H.EqualP () a b
-pattern ParenA a = H.ParenA () a
-pattern WildCardA a = H.WildCardA () a
+pattern ClassA a b = H.ClassA () (a :: QName) (b :: [Type]) :: Asst
+pattern AppA a b = H.AppA () (a :: Name) (b :: [Type]) :: Asst
+pattern InfixA a b c = H.InfixA () (a :: Type) (b :: QName) (c :: Type) :: Asst
+pattern IParam a b = H.IParam () (a :: IPName) (b :: Type) :: Asst
+pattern EqualP a b = H.EqualP () (a :: Type) (b :: Type) :: Asst
+pattern ParenA a = H.ParenA () (a :: Asst) :: Asst
+pattern WildCardA a = H.WildCardA () (a :: (Maybe Name)) :: Asst
 
+-- ** `H.Literal`
 -- literals are extra redundant!
 type Literal = H.Literal ()
-pattern Char a <- H.Char () a _
+
+pattern Char a <- H.Char () (a :: Char) _ :: Literal
     where Char a = H.Char () a [a]
-pattern String a <- H.String () a _
+pattern String a <- H.String () (a :: String) _ :: Literal
     where String a = H.String () a a
-pattern Int a <- H.Int () a _
+pattern Int a <- H.Int () (a :: Integer) _ :: Literal
     where Int a = H.Int () a (show a)
-pattern Frac a <- H.Frac () a _
+pattern Frac a <- H.Frac () (a :: Rational) _ :: Literal
     where Frac a = H.Frac () a (show a)
-pattern PrimInt a <- H.PrimInt () a _
+pattern PrimInt a <- H.PrimInt () (a :: Integer) _ :: Literal
     where PrimInt a = H.PrimInt () a (show a)
-pattern PrimWord a <- H.PrimWord () a _
+pattern PrimWord a <- H.PrimWord () (a :: Integer) _ :: Literal
     where PrimWord a = H.PrimWord () a (show a)
-pattern PrimFloat a <- H.PrimFloat () a _
+pattern PrimFloat a <- H.PrimFloat () (a :: Rational) _ :: Literal
     where PrimFloat a = H.PrimFloat () a (show a)
-pattern PrimDouble a <- H.PrimDouble () a _
+pattern PrimDouble a <- H.PrimDouble () (a :: Rational) _ :: Literal
     where PrimDouble a = H.PrimDouble () a (show a)
-pattern PrimChar a <- H.PrimChar () a _
+pattern PrimChar a <- H.PrimChar () (a :: Char) _ :: Literal
     where PrimChar a = H.PrimChar () a (show a)
-pattern PrimString a <- H.PrimString () a _
+pattern PrimString a <- H.PrimString () (a :: String) _ :: Literal
     where PrimString a = H.PrimString () a (show a)
 
+-- ** `H.Sign`
 type Sign = H.Sign ()
-pattern Signless = H.Signless ()
-pattern Negative = H.Negative ()
+pattern Signless = H.Signless () :: Sign
+pattern Negative = H.Negative () :: Sign
 
+-- ** `H.Exp`
 type Exp = H.Exp ()
-pattern Var a = H.Var () a
-pattern OverloadedLabel a = H.OverloadedLabel () a
-pattern IPVar a = H.IPVar () a
-pattern Con a = H.Con () a
-pattern Lit a = H.Lit () a
-pattern InfixApp a b c = H.InfixApp () a b c
-pattern App a b = H.App () a b
-pattern NegApp a = H.NegApp () a
-pattern Lambda a b = H.Lambda () a b
-pattern Let a b = H.Let () a b
-pattern If a b c = H.If () a b c
-pattern MultiIf a = H.MultiIf () a
-pattern Case a b = H.Case () a b
-pattern Do a = H.Do () a
-pattern MDo a = H.MDo () a
-pattern Tuple a b = H.Tuple () a b
-pattern TupleSection a b = H.TupleSection () a b
-pattern List a = H.List () a
-pattern ParArray a = H.ParArray () a
-pattern Paren a = H.Paren () a
-pattern LeftSection a b = H.LeftSection () a b
-pattern RightSection a b = H.RightSection () a b
-pattern RecConstr a b = H.RecConstr () a b
-pattern RecUpdate a b = H.RecUpdate () a b
-pattern EnumFrom a = H.EnumFrom () a
-pattern EnumFromTo a b = H.EnumFromTo () a b
-pattern EnumFromThen a b = H.EnumFromThen () a b
-pattern EnumFromThenTo a b c = H.EnumFromThenTo () a b c
-pattern ParArrayFromTo a b = H.ParArrayFromTo () a b
-pattern ParArrayFromThenTo a b c = H.ParArrayFromThenTo () a b c
-pattern ListComp a b = H.ListComp () a b
-pattern ParComp a b = H.ParComp () a b
-pattern ParArrayComp a b = H.ParArrayComp () a b
-pattern ExpTypeSig a b = H.ExpTypeSig () a b
-pattern VarQuote a = H.VarQuote () a
-pattern TypQuote a = H.TypQuote () a
-pattern BracketExp a = H.BracketExp () a
-pattern SpliceExp a = H.SpliceExp () a
-pattern QuasiQuote a b = H.QuasiQuote () a b
-pattern TypeApp a = H.TypeApp () a
-pattern XTag a b c d = H.XTag () a b c d
-pattern XETag a b c = H.XETag () a b c
-pattern XPcdata a = H.XPcdata () a
-pattern XExpTag a = H.XExpTag () a
-pattern XChildTag a = H.XChildTag () a
-pattern CorePragma a b = H.CorePragma () a b
-pattern SCCPragma a b = H.SCCPragma () a b
-pattern GenPragma a b c d = H.GenPragma () a b c d
-pattern Proc a b = H.Proc () a b
-pattern LeftArrApp a b = H.LeftArrApp () a b
-pattern RightArrApp a b = H.RightArrApp () a b
-pattern LeftArrHighApp a b = H.LeftArrHighApp () a b
-pattern RightArrHighApp a b = H.RightArrHighApp () a b
-pattern LCase a = H.LCase () a
-pattern ExprHole = H.ExprHole ()
+pattern Var a = H.Var () (a :: QName) :: Exp
+pattern OverloadedLabel a = H.OverloadedLabel () (a :: String) :: Exp
+pattern IPVar a = H.IPVar () (a :: IPName) :: Exp
+pattern Con a = H.Con () (a :: QName) :: Exp
+pattern Lit a = H.Lit () (a :: Literal) :: Exp
+pattern InfixApp a b c = H.InfixApp () (a :: Exp) (b :: QOp) (c :: Exp) :: Exp
+pattern App a b = H.App () (a :: Exp) (b :: Exp) :: Exp
+pattern NegApp a = H.NegApp () (a :: Exp) :: Exp
+pattern Lambda a b = H.Lambda () (a :: [Pat]) (b :: Exp) :: Exp
+pattern Let a b = H.Let () (a :: Binds) (b :: Exp) :: Exp
+pattern If a b c = H.If () (a :: Exp) (b :: Exp) (c :: Exp) :: Exp
+pattern MultiIf a = H.MultiIf () (a :: [GuardedRhs]) :: Exp
+pattern Case a b = H.Case () (a :: Exp) (b :: [Alt]) :: Exp
+pattern Do a = H.Do () (a :: [Stmt]) :: Exp
+pattern MDo a = H.MDo () (a :: [Stmt]) :: Exp
+pattern Tuple a b = H.Tuple () (a :: Boxed) (b :: [Exp]) :: Exp
+pattern TupleSection a b = H.TupleSection () (a :: Boxed) (b :: [Maybe Exp]) :: Exp
+pattern List a = H.List () (a :: [Exp]) :: Exp
+pattern ParArray a = H.ParArray () (a :: [Exp]) :: Exp
+pattern Paren a = H.Paren () (a :: Exp) :: Exp
+pattern LeftSection a b = H.LeftSection () (a :: Exp) (b :: QOp) :: Exp
+pattern RightSection a b = H.RightSection () (a :: QOp) (b :: Exp) :: Exp
+pattern RecConstr a b = H.RecConstr () (a :: QName) (b :: [FieldUpdate]) :: Exp
+pattern RecUpdate a b = H.RecUpdate () (a :: Exp) (b :: [FieldUpdate]) :: Exp
+pattern EnumFrom a = H.EnumFrom () (a :: Exp) :: Exp
+pattern EnumFromTo a b = H.EnumFromTo () (a :: Exp) (b :: Exp) :: Exp
+pattern EnumFromThen a b = H.EnumFromThen () (a :: Exp) (b :: Exp) :: Exp
+pattern EnumFromThenTo a b c = H.EnumFromThenTo () (a :: Exp) (b :: Exp) (c :: Exp) :: Exp
+pattern ParArrayFromTo a b = H.ParArrayFromTo () (a :: Exp) (b :: Exp) :: Exp
+pattern ParArrayFromThenTo a b c = H.ParArrayFromThenTo () (a :: Exp) (b :: Exp) (c :: Exp) :: Exp
+pattern ListComp a b = H.ListComp () (a :: Exp) (b :: [QualStmt]) :: Exp
+pattern ParComp a b = H.ParComp () (a :: Exp) (b :: [[QualStmt]]) :: Exp
+pattern ParArrayComp a b = H.ParArrayComp () (a :: Exp) (b :: [[QualStmt]]) :: Exp
+pattern ExpTypeSig a b = H.ExpTypeSig () (a :: Exp) (b :: Type) :: Exp
+pattern VarQuote a = H.VarQuote () (a :: QName) :: Exp
+pattern TypQuote a = H.TypQuote () (a :: QName) :: Exp
+pattern BracketExp a = H.BracketExp () (a :: Bracket) :: Exp
+pattern SpliceExp a = H.SpliceExp () (a :: Splice) :: Exp
+pattern QuasiQuote a b = H.QuasiQuote () (a :: String) (b :: String) :: Exp
+pattern TypeApp a = H.TypeApp () (a :: Type) :: Exp
+pattern XTag a b c d = H.XTag () (a :: XName) (b :: [XAttr]) (c :: (Maybe Exp)) (d :: [Exp]) :: Exp
+pattern XETag a b c = H.XETag () (a :: XName) (b :: [XAttr]) (c :: (Maybe Exp)) :: Exp
+pattern XPcdata a = H.XPcdata () (a :: String) :: Exp
+pattern XExpTag a = H.XExpTag () (a :: Exp) :: Exp
+pattern XChildTag a = H.XChildTag () (a :: [Exp]) :: Exp
+pattern CorePragma a b = H.CorePragma () (a :: String) (b :: Exp) :: Exp
+pattern SCCPragma a b = H.SCCPragma () (a :: String) (b :: Exp) :: Exp
+pattern GenPragma a b c d = H.GenPragma () (a :: String) (b :: (Int, Int)) (c :: (Int, Int)) (d :: Exp) :: Exp
+pattern Proc a b = H.Proc () (a :: Pat) (b :: Exp) :: Exp
+pattern LeftArrApp a b = H.LeftArrApp () (a :: Exp) (b :: Exp) :: Exp
+pattern RightArrApp a b = H.RightArrApp () (a :: Exp) (b :: Exp) :: Exp
+pattern LeftArrHighApp a b = H.LeftArrHighApp () (a :: Exp) (b :: Exp) :: Exp
+pattern RightArrHighApp a b = H.RightArrHighApp () (a :: Exp) (b :: Exp) :: Exp
+pattern LCase a = H.LCase () (a :: [Alt]) :: Exp
+pattern ExprHole = H.ExprHole () :: Exp
 
+-- ** `H.XName`
 type XName = H.XName ()
-pattern XName a = H.XName () a
-pattern XDomName a b = H.XDomName () a b
+pattern XName a = H.XName () (a :: String) :: XName
+pattern XDomName a b = H.XDomName () (a :: String) (b :: String) :: XName
 
+-- ** `H.XAttr`
 type XAttr = H.XAttr ()
-pattern XAttr a b = H.XAttr () a b
+pattern XAttr a b = H.XAttr () (a :: XName) (b :: Exp) :: XAttr
 
+-- ** `H.Bracket`
 type Bracket = H.Bracket ()
-pattern ExpBracket a = H.ExpBracket () a
-pattern PatBracket a = H.PatBracket () a
-pattern TypeBracket a = H.TypeBracket () a
-pattern DeclBracket a = H.DeclBracket () a
+pattern ExpBracket a = H.ExpBracket () (a :: Exp) :: Bracket
+pattern PatBracket a = H.PatBracket () (a :: Pat) :: Bracket
+pattern TypeBracket a = H.TypeBracket () (a :: Type) :: Bracket
+pattern DeclBracket a = H.DeclBracket () (a :: [Decl]) :: Bracket
 
+-- ** `H.Splice`
 type Splice = H.Splice ()
-pattern IdSplice a = H.IdSplice () a
-pattern ParenSplice a = H.ParenSplice () a
+pattern IdSplice a = H.IdSplice () (a :: String) :: Splice
+pattern ParenSplice a = H.ParenSplice () (a :: Exp) :: Splice
 
+-- ** `H.Safety`
 type Safety = H.Safety ()
-pattern PlayRisky = H.PlayRisky ()
-pattern PlaySafe a = H.PlaySafe () a
-pattern PlayInterruptible = H.PlayInterruptible ()
+pattern PlayRisky = H.PlayRisky () :: Safety
+pattern PlaySafe a = H.PlaySafe () (a :: Bool) :: Safety
+pattern PlayInterruptible = H.PlayInterruptible () :: Safety
 
+-- ** `H.CallConv`
 type CallConv = H.CallConv ()
-pattern StdCall = H.StdCall ()
-pattern CCall = H.CCall ()
-pattern CPlusPlus = H.CPlusPlus ()
-pattern DotNet = H.DotNet ()
-pattern Jvm = H.Jvm ()
-pattern Js = H.Js ()
-pattern JavaScript = H.JavaScript ()
-pattern CApi = H.CApi ()
+pattern StdCall = H.StdCall () :: CallConv
+pattern CCall = H.CCall () :: CallConv
+pattern CPlusPlus = H.CPlusPlus () :: CallConv
+pattern DotNet = H.DotNet () :: CallConv
+pattern Jvm = H.Jvm () :: CallConv
+pattern Js = H.Js () :: CallConv
+pattern JavaScript = H.JavaScript () :: CallConv
+pattern CApi = H.CApi () :: CallConv
 
+-- ** `H.ModulePragma`
 type ModulePragma = H.ModulePragma ()
-pattern LanguagePragma a = H.LanguagePragma () a
-pattern OptionsPragma a b = H.OptionsPragma () a b
-pattern AnnModulePragma a = H.AnnModulePragma () a
+pattern LanguagePragma a = H.LanguagePragma () (a :: [Name]) :: ModulePragma
+pattern OptionsPragma a b = H.OptionsPragma () (a :: (Maybe Tool)) (b :: String) :: ModulePragma
+pattern AnnModulePragma a = H.AnnModulePragma () (a :: Annotation) :: ModulePragma
 
+-- skipped: data Tool
+
+-- ** `H.Overlap`
 type Overlap = H.Overlap ()
-pattern NoOverlap = H.NoOverlap ()
-pattern Overlap = H.Overlap ()
-pattern Incoherent = H.Incoherent ()
+pattern NoOverlap = H.NoOverlap () :: Overlap
+pattern Overlap = H.Overlap () :: Overlap
+pattern Incoherent = H.Incoherent () :: Overlap
 
+-- ** `H.Activation`
 type Activation = H.Activation ()
-pattern ActiveFrom a = H.ActiveFrom () a
-pattern ActiveUntil a = H.ActiveUntil () a
+pattern ActiveFrom a = H.ActiveFrom () (a :: Int) :: Activation
+pattern ActiveUntil a = H.ActiveUntil () (a :: Int) :: Activation
 
+-- ** `H.Rule`
 type Rule = H.Rule ()
-pattern Rule a b c d e = H.Rule () a b c d e
+pattern Rule a b c d e = H.Rule () (a :: String) (b :: (Maybe Activation)) (c :: (Maybe [RuleVar])) (d :: Exp) (e :: Exp) :: Rule
 
+-- ** `H.RuleVar`
 type RuleVar = H.RuleVar ()
-pattern RuleVar a = H.RuleVar () a
-pattern TypedRuleVar a b = H.TypedRuleVar () a b
+pattern RuleVar a = H.RuleVar () (a :: Name) :: RuleVar
+pattern TypedRuleVar a b = H.TypedRuleVar () (a :: Name) (b :: Type) :: RuleVar
 
+-- ** `H.WarningText`
 type WarningText = H.WarningText ()
-pattern DeprText a = H.DeprText () a
-pattern WarnText a = H.WarnText () a
+pattern DeprText a = H.DeprText () (a :: String) :: WarningText
+pattern WarnText a = H.WarnText () (a :: String) :: WarningText
 
+-- ** `H.Pat`
 type Pat = H.Pat ()
-pattern PVar a = H.PVar () a
-pattern PLit a b = H.PLit () a b
-pattern PNPlusK a b = H.PNPlusK () a b
-pattern PInfixApp a b c = H.PInfixApp () a b c
-pattern PApp a b = H.PApp () a b
-pattern PTuple a b = H.PTuple () a b
-pattern PList a = H.PList () a
-pattern PParen a = H.PParen () a
-pattern PRec a b = H.PRec () a b
-pattern PAsPat a b = H.PAsPat () a b
-pattern PWildCard = H.PWildCard ()
-pattern PIrrPat a = H.PIrrPat () a
-pattern PatTypeSig a b = H.PatTypeSig () a b
-pattern PViewPat a b = H.PViewPat () a b
-pattern PRPat a = H.PRPat () a
-pattern PXTag a b c d = H.PXTag () a b c d
-pattern PXETag a b c = H.PXETag () a b c
-pattern PXPcdata a = H.PXPcdata () a
-pattern PXPatTag a = H.PXPatTag () a
-pattern PXRPats a = H.PXRPats () a
-pattern PQuasiQuote a b = H.PQuasiQuote () a b
-pattern PBangPat a = H.PBangPat () a
+pattern PVar a = H.PVar () (a :: Name) :: Pat
+pattern PLit a b = H.PLit () (a :: Sign) (b :: Literal) :: Pat
+pattern PNPlusK a b = H.PNPlusK () (a :: Name) (b :: Integer) :: Pat
+pattern PInfixApp a b c = H.PInfixApp () (a :: Pat) (b :: QName) (c :: Pat) :: Pat
+pattern PApp a b = H.PApp () (a :: QName) (b :: [Pat]) :: Pat
+pattern PTuple a b = H.PTuple () (a :: Boxed) (b :: [Pat]) :: Pat
+pattern PList a = H.PList () (a :: [Pat]) :: Pat
+pattern PParen a = H.PParen () (a :: Pat) :: Pat
+pattern PRec a b = H.PRec () (a :: QName) (b :: [PatField]) :: Pat
+pattern PAsPat a b = H.PAsPat () (a :: Name) (b :: Pat) :: Pat
+pattern PWildCard = H.PWildCard () :: Pat
+pattern PIrrPat a = H.PIrrPat () (a :: Pat) :: Pat
+pattern PatTypeSig a b = H.PatTypeSig () (a :: Pat) (b :: Type) :: Pat
+pattern PViewPat a b = H.PViewPat () (a :: Exp) (b :: Pat) :: Pat
+pattern PRPat a = H.PRPat () (a :: [RPat]) :: Pat
+pattern PXTag a b c d = H.PXTag () (a :: XName) (b :: [PXAttr]) (c :: (Maybe Pat)) (d :: [Pat]) :: Pat
+pattern PXETag a b c = H.PXETag () (a :: XName) (b :: [PXAttr]) (c :: (Maybe Pat)) :: Pat
+pattern PXPcdata a = H.PXPcdata () (a :: String) :: Pat
+pattern PXPatTag a = H.PXPatTag () (a :: Pat) :: Pat
+pattern PXRPats a = H.PXRPats () (a :: [RPat]) :: Pat
+pattern PQuasiQuote a b = H.PQuasiQuote () (a :: String) (b :: String) :: Pat
+pattern PBangPat a = H.PBangPat () (a :: Pat) :: Pat
 
+-- ** `H.PXAttr`
 type PXAttr = H.PXAttr ()
-pattern PXAttr a b = H.PXAttr () a b
+pattern PXAttr a b = H.PXAttr () (a :: XName) (b :: Pat) :: PXAttr
 
+-- ** `H.RPatOp`
 type RPatOp = H.RPatOp ()
-pattern RPStar = H.RPStar ()
-pattern RPStarG = H.RPStarG ()
-pattern RPPlus = H.RPPlus ()
-pattern RPPlusG = H.RPPlusG ()
-pattern RPOpt = H.RPOpt ()
-pattern RPOptG = H.RPOptG ()
+pattern RPStar = H.RPStar () :: RPatOp
+pattern RPStarG = H.RPStarG () :: RPatOp
+pattern RPPlus = H.RPPlus () :: RPatOp
+pattern RPPlusG = H.RPPlusG () :: RPatOp
+pattern RPOpt = H.RPOpt () :: RPatOp
+pattern RPOptG = H.RPOptG () :: RPatOp
 
+-- ** `H.RPat`
 type RPat = H.RPat ()
-pattern RPOp a b = H.RPOp () a b
-pattern RPEither a b = H.RPEither () a b
-pattern RPSeq a = H.RPSeq () a
-pattern RPGuard a b = H.RPGuard () a b
-pattern RPCAs a b = H.RPCAs () a b
-pattern RPAs a b = H.RPAs () a b
-pattern RPParen a = H.RPParen () a
-pattern RPPat a = H.RPPat () a
+pattern RPOp a b = H.RPOp () (a :: RPat) (b :: RPatOp) :: RPat
+pattern RPEither a b = H.RPEither () (a :: RPat) (b :: RPat) :: RPat
+pattern RPSeq a = H.RPSeq () (a :: [RPat]) :: RPat
+pattern RPGuard a b = H.RPGuard () (a :: Pat) (b :: [Stmt]) :: RPat
+pattern RPCAs a b = H.RPCAs () (a :: Name) (b :: RPat) :: RPat
+pattern RPAs a b = H.RPAs () (a :: Name) (b :: RPat) :: RPat
+pattern RPParen a = H.RPParen () (a :: RPat) :: RPat
+pattern RPPat a = H.RPPat () (a :: Pat) :: RPat
 
+-- ** `H.PatField`
 type PatField = H.PatField ()
-pattern PFieldPat a b = H.PFieldPat () a b
-pattern PFieldPun a = H.PFieldPun () a
-pattern PFieldWildcard = H.PFieldWildcard ()
+pattern PFieldPat a b = H.PFieldPat () (a :: QName) (b :: Pat) :: PatField
+pattern PFieldPun a = H.PFieldPun () (a :: QName) :: PatField
+pattern PFieldWildcard = H.PFieldWildcard () :: PatField
 
+-- ** `H.Stmt`
 type Stmt = H.Stmt ()
-pattern Generator a b = H.Generator () a b
-pattern Qualifier a = H.Qualifier () a
-pattern LetStmt a = H.LetStmt () a
-pattern RecStmt a = H.RecStmt () a
+pattern Generator a b = H.Generator () (a :: Pat) (b :: Exp) :: Stmt
+pattern Qualifier a = H.Qualifier () (a :: Exp) :: Stmt
+pattern LetStmt a = H.LetStmt () (a :: Binds) :: Stmt
+pattern RecStmt a = H.RecStmt () (a :: [Stmt]) :: Stmt
 
+-- ** `H.QualStmt`
 type QualStmt = H.QualStmt ()
-pattern QualStmt a = H.QualStmt () a
-pattern ThenTrans a = H.ThenTrans () a
-pattern ThenBy a b = H.ThenBy () a b
-pattern GroupBy a = H.GroupBy () a
-pattern GroupUsing a = H.GroupUsing () a
-pattern GroupByUsing a b = H.GroupByUsing () a b
+pattern QualStmt a = H.QualStmt () (a :: Stmt) :: QualStmt
+pattern ThenTrans a = H.ThenTrans () (a :: Exp) :: QualStmt
+pattern ThenBy a b = H.ThenBy () (a :: Exp) (b :: Exp) :: QualStmt
+pattern GroupBy a = H.GroupBy () (a :: Exp) :: QualStmt
+pattern GroupUsing a = H.GroupUsing () (a :: Exp) :: QualStmt
+pattern GroupByUsing a b = H.GroupByUsing () (a :: Exp) (b :: Exp) :: QualStmt
 
+-- ** `H.FieldUpdate`
 type FieldUpdate = H.FieldUpdate ()
-pattern FieldUpdate a b = H.FieldUpdate () a b
-pattern FieldPun a = H.FieldPun () a
-pattern FieldWildcard = H.FieldWildcard ()
+pattern FieldUpdate a b = H.FieldUpdate () (a :: QName) (b :: Exp) :: FieldUpdate
+pattern FieldPun a = H.FieldPun () (a :: QName) :: FieldUpdate
+pattern FieldWildcard = H.FieldWildcard () :: FieldUpdate
 
+-- ** `H.Alt`
 type Alt = H.Alt ()
-pattern Alt a b c = H.Alt () a b c
+pattern Alt a b c = H.Alt () (a :: Pat) (b :: Rhs) (c :: (Maybe Binds)) :: Alt
+
+-- * Functions
 
 prelude_mod, main_mod :: ModuleName
 prelude_mod = H.prelude_mod ()

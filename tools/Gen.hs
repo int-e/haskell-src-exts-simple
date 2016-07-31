@@ -36,8 +36,9 @@ head_ (ModuleHead _ (ModuleName _ n) _ _) =
     n' = "Language.Haskell.Exts.Simple" ++ drop 21 n
 
 decl_ (DataDecl _ _ _ (DHApp _ (DHead _ (Ident _ n)) (UnkindedVar _ (Ident _ "l"))) dcons _) =
-    ["type " ++ n ++ " = H." ++ n ++ " ()"] ++
-    (dcons >>= qualConDecl_) ++
+    ["-- ** `H." ++ n ++ "`",
+     "type " ++ n ++ " = H." ++ n ++ " ()"] ++
+    (dcons >>= qualConDecl_ n) ++
     [""]
 decl_ (DataDecl _ _ _ dhead dcons _) =
     ["-- skipped: data " ++ prettyPrint dhead,
@@ -48,10 +49,7 @@ decl_ (TypeSig _ ns (TyFun _ (TyVar _ (Ident _ "l")) t)) =
     [""]
   where
     ns' = [n | Ident _ n <- ns]
-    f :: Type SrcSpanInfo -> Type SrcSpanInfo
-    f (TyApp i t@(TyCon _ (UnQual _ n)) (TyVar _ (Ident _ "l"))) = t
-    f tv  = tv
-    t' = everywhere (id `extT` f) t
+    t' = adjType t
 decl_ t@TypeSig{} =
     ["-- skipped: " ++ prettyPrint t, ""]
 decl_ FunBind{} = []
@@ -62,15 +60,21 @@ decl_ InstDecl{} = []
 decl_ e = error $ prettyPrint e
 
 
-qualConDecl_ (QualConDecl _ _ _ (ConDecl _ (Ident _ n) ts@(TyVar _ (Ident _ "l") : _))) =
-    ["pattern " ++ n ++ vs ++ " = H." ++ n ++ " ()" ++ vs]
+qualConDecl_ t' (QualConDecl _ _ _ (ConDecl _ (Ident _ n) (TyVar _ (Ident _ "l") : ts))) =
+    ["pattern " ++ n ++ vars ts ++ " = H." ++ n ++ " ()" ++ vars' ts ++ " :: " ++ t']
+qualConDecl_ t' (QualConDecl _ _ _ (ConDecl _ (Ident _ n) ts)) =
+    ["pattern " ++ n ++ vars ts ++ " = H." ++ n ++ vars' ts ++ " :: " ++ t']
+qualConDecl_ t' (QualConDecl _ _ _ (RecDecl _ (Ident _ n) (FieldDecl _ _ (TyVar _ (Ident _ "l")) : fs))) =
+    ["-- TODO: record constructor",
+     "pattern " ++ n ++ vars ts ++ " = H." ++ n ++ " ()" ++ vars' ts ++ " :: " ++ t']
   where
-    vs = unwords (take (length ts) $ "" : map return ['a'..])
-qualConDecl_ (QualConDecl _ _ _ (ConDecl _ (Ident _ n) ts)) =
-    ["pattern " ++ n ++ vs ++ " = H." ++ n ++ vs]
-  where
-    vs = " " ++ unwords (take (length ts) $ map return ['a'..])
-qualConDecl_ (QualConDecl _ _ _ (RecDecl _ (Ident _ n) ts@(FieldDecl _ _ (TyVar _ (Ident _ "l")) : _))) =
-    ["pattern " ++ n ++ vs ++ " = H." ++ n ++ " ()" ++ vs]
-  where
-    vs = " " ++ unwords (take (length ts - 1) $ map return ['a'..])
+    ts = [t | FieldDecl _ _ t <- fs]
+
+vars ts = unwords ("" : (take (length ts) $ map return ['a'..]))
+vars' ts = unwords ("" : zipWith (\n t -> "(" ++ [n] ++ " :: " ++ prettyPrint (adjType t) ++ ")") ['a'..] ts)
+
+adjType = everywhere (id `extT` f) where
+    f :: Type SrcSpanInfo -> Type SrcSpanInfo
+    f (TyApp _ t@(TyCon _ (UnQual _ n)) (TyVar _ (Ident _ "l"))) = t
+    f (TyParen _ t@TyCon{}) = t
+    f tv  = tv

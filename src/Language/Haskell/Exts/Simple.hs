@@ -1,3 +1,8 @@
+-- |
+-- This module exports all relevant modules of the haskell-src-exts-simple package.
+--
+-- The most important module is "Language.Haskell.Exts.Simple.Syntax".
+
 {-# LANGUAGE PatternSynonyms #-}
 module Language.Haskell.Exts.Simple (
     module Language.Haskell.Exts.Simple.Syntax,
@@ -22,6 +27,8 @@ import Language.Haskell.Exts.Simple.Fixity
 import Language.Haskell.Exts.Simple.Extension
 import Language.Haskell.Exts.Simple.Comments
 import Language.Haskell.Exts.Simple.Parser
+
+-- * Functions
 
 parseFile :: FilePath -> IO (ParseResult Module)
 parseFile = fmap (fmap (fmap (const ()))) . H.parseFile
