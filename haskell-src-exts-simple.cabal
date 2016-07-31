@@ -1,27 +1,55 @@
 name:                haskell-src-exts-simple
-version:             0.0.2
--- synopsis:            
--- description:         
+version:             1.18.0
+synopsis:            A simplified view on the haskell-src-exts AST
+description:
+    This package provides a shim for haskell-src-exts (HSE), exposing the
+    same AST but without annotations.
+    .
+    This package is useful for synthesizing and manipulating HSE ASTs
+    that don't carry source location information. It may also aid
+    in porting packages from haskell-src-exts 1.17 to 1.18, but it
+    is not a drop-in replacement for the old annotation-free AST.
+    See COMPATIBILITY.md for details.
+    .
+    The basic idea is to expose datatypes like
+    .
+    > data Name l = Ident l String | Symbol l String
+    .
+    using ghc's pattern synonyms:
+    .
+    > type Name = H.Name ()
+    > pattern Ident a = H.Ident () a
+    > pattern Symbol a = H.Symbol () a
+    .
+    See `Language.Haskell.Exts.Simple` for further information.
 license:             MIT
 license-file:        LICENSE
 author:              Bertram Felgenhauer
-maintainer:          int-e@gmx.de
--- copyright:           
+maintainer:          Bertram Felgenhauer <int-e@gmx.de>
+copyright:           2016, Bertram Felgenhauer
 category:            Development
 build-type:          Simple
-extra-source-files:  ChangeLog.md
+extra-source-files:
+    README.md,
+    COMPATIBILITY.md,
+    CHANGELOG.md
 cabal-version:       >=1.10
 
 library
     exposed-modules:
         Language.Haskell.Exts.Simple,
-        Language.Haskell.Exts.Simple.Syntax,
-        Language.Haskell.Exts.Simple.Fixity
+        Language.Haskell.Exts.Simple.Build,
+        Language.Haskell.Exts.Simple.Comments,
+        Language.Haskell.Exts.Simple.Extension,
+        Language.Haskell.Exts.Simple.Fixity,
+        Language.Haskell.Exts.Simple.Parser,
+        Language.Haskell.Exts.Simple.Pretty,
+        Language.Haskell.Exts.Simple.Syntax
     -- other-modules:       
     other-extensions:
         PatternSynonyms
     build-depends:
-        base >= 4 && < 5,
-        haskell-src-exts >= 1.18.2 && < 1.19
+        base >= 4.8 && < 5,
+        haskell-src-exts >= 1.18 && < 1.19
     hs-source-dirs:      src
     default-language:    Haskell2010

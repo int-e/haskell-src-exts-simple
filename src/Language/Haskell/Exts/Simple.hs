@@ -1,14 +1,12 @@
 {-# LANGUAGE PatternSynonyms #-}
 module Language.Haskell.Exts.Simple (
     module Language.Haskell.Exts.Simple.Syntax,
-    module Language.Haskell.Exts.Lexer,
-    module Language.Haskell.Exts.Build,
-    module Language.Haskell.Exts.Pretty,
+    module Language.Haskell.Exts.Simple.Build,
+    module Language.Haskell.Exts.Simple.Pretty,
     module Language.Haskell.Exts.Simple.Fixity,
-    module Language.Haskell.Exts.SrcLoc,
-    module Language.Haskell.Exts.Comments,
-    module Language.Haskell.Exts.Extension,
-    module Language.Haskell.Exts.Parser,
+    module Language.Haskell.Exts.Simple.Comments,
+    module Language.Haskell.Exts.Simple.Extension,
+    module Language.Haskell.Exts.Simple.Parser,
     module Language.Haskell.Exts.Simple
 ) where
 
@@ -18,14 +16,12 @@ import Language.Haskell.Exts (
  )
 
 import Language.Haskell.Exts.Simple.Syntax
-import Language.Haskell.Exts.Lexer
-import Language.Haskell.Exts.Build
-import Language.Haskell.Exts.Pretty
+import Language.Haskell.Exts.Simple.Build
+import Language.Haskell.Exts.Simple.Pretty
 import Language.Haskell.Exts.Simple.Fixity
-import Language.Haskell.Exts.SrcLoc
-import Language.Haskell.Exts.Extension
-import Language.Haskell.Exts.Comments
-import Language.Haskell.Exts.Parser
+import Language.Haskell.Exts.Simple.Extension
+import Language.Haskell.Exts.Simple.Comments
+import Language.Haskell.Exts.Simple.Parser
 
 parseFile :: FilePath -> IO (ParseResult Module)
 parseFile = fmap (fmap (fmap (const ()))) . H.parseFile
