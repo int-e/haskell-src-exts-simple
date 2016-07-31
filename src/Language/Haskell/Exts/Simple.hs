@@ -11,6 +11,7 @@ module Language.Haskell.Exts.Simple (
     module Language.Haskell.Exts.Simple.Fixity,
     module Language.Haskell.Exts.Simple.Extension,
     module Language.Haskell.Exts.Simple.Parser,
+    module Language.Haskell.Exts.SrcLoc,
     module Language.Haskell.Exts.Simple
 ) where
 
@@ -25,6 +26,7 @@ import Language.Haskell.Exts.Simple.Pretty
 import Language.Haskell.Exts.Simple.Fixity
 import Language.Haskell.Exts.Simple.Extension
 import Language.Haskell.Exts.Simple.Parser
+import Language.Haskell.Exts.SrcLoc -- useful for interpreting parse errors
 
 -- * Functions
 
