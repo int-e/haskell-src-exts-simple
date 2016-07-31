@@ -33,7 +33,12 @@ extra-source-files:
     README.md,
     COMPATIBILITY.md,
     CHANGELOG.md
+homepage:            https://github.com/int-e/haskell-src-exts-simple
 cabal-version:       >=1.10
+
+source-repository head
+    type:            git
+    location:        https://github.com/int-e/haskell-src-exts-simple
 
 library
     exposed-modules:
