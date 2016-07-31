@@ -9,7 +9,6 @@ module Language.Haskell.Exts.Simple (
     module Language.Haskell.Exts.Simple.Build,
     module Language.Haskell.Exts.Simple.Pretty,
     module Language.Haskell.Exts.Simple.Fixity,
-    module Language.Haskell.Exts.Simple.Comments,
     module Language.Haskell.Exts.Simple.Extension,
     module Language.Haskell.Exts.Simple.Parser,
     module Language.Haskell.Exts.Simple
@@ -25,7 +24,6 @@ import Language.Haskell.Exts.Simple.Build
 import Language.Haskell.Exts.Simple.Pretty
 import Language.Haskell.Exts.Simple.Fixity
 import Language.Haskell.Exts.Simple.Extension
-import Language.Haskell.Exts.Simple.Comments
 import Language.Haskell.Exts.Simple.Parser
 
 -- * Functions
@@ -41,14 +39,6 @@ parseFileWithMode :: ParseMode -> FilePath -> IO (ParseResult Module)
 parseFileWithMode m = fmap (fmap (fmap (const ()))) . H.parseFileWithMode m
 
 
-parseFileWithComments :: ParseMode -> FilePath -> IO (ParseResult (Module, [Comment]))
-parseFileWithComments m =
-    fmap (fmap (\(a, b) -> (fmap (const ()) a, b))) . H.parseFileWithComments m
-
-parseFileWithCommentsAndPragmas :: ParseMode -> FilePath ->IO (ParseResult (Module, [Comment], [UnknownPragma]))
-parseFileWithCommentsAndPragmas m =
-    fmap (fmap (\(a, b, c) -> (fmap (const ()) a, b, c))) . H.parseFileWithCommentsAndPragmas m
-
 parseFileContents :: String -> ParseResult Module
 parseFileContents = fmap (fmap (const ())) . H.parseFileContents
 
@@ -59,7 +49,3 @@ parseFileContentsWithExts e =
 parseFileContentsWithMode :: ParseMode -> String -> ParseResult Module
 parseFileContentsWithMode m =
     fmap (fmap (const ())) . H.parseFileContentsWithMode m
-
-parseFileContentsWithComments :: ParseMode -> String -> ParseResult (Module, [Comment])
-parseFileContentsWithComments m =
-    fmap (\(a, b) -> (fmap (const ()) a, b)) . H.parseFileContentsWithComments m
