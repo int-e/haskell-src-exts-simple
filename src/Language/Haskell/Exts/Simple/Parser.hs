@@ -1,7 +1,11 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 -- |
 -- This module reexports "Language.Haskell.Exts.Parser" with adaptations.
+--
+-- __IMPORTANT__: if you require compatiblity with ghc 7.8, you should use the
+-- function `listOf` for constructing `ListOf` values!
 
 module Language.Haskell.Exts.Simple.Parser (
     module Language.Haskell.Exts.Simple.Parser,
@@ -25,8 +29,20 @@ import Language.Haskell.Exts.Simple.Syntax
 -- * Datatypes and Constructors
 
 -- ** `H.ListOf`
+-- | Beware that the `ListOf` constructor only works in a pattern context
+-- in ghc-7.8, because that version does not support explicitly bidirectional
+-- pattern synonyms.
+--
+-- For code that needs to work with ghc-7.8, we provide the `listOf` function
+-- constructing `ListOf` values.
+
 type ListOf = H.ListOf
-pattern ListOf a <- H.ListOf _ a where ListOf a = H.ListOf H.noSrcSpan a
+pattern ListOf a <- H.ListOf _ a
+#if __GLASGOW_HASKELL__ > 708
+   where ListOf a = listOf a
+#endif
+listOf :: [a] -> ListOf a
+listOf a = H.ListOf H.noSrcSpan a
 
 -- ** `H.PragmasAndModuleName`
 type PragmasAndModuleName = H.PragmasAndModuleName ()

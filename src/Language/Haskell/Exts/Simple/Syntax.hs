@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 -- |
@@ -11,6 +12,18 @@
 -- > type Name = H.Name ()
 -- > pattern Ident a = H.Ident () a
 -- > pattern Symbol a = H.Symbol () a
+--
+-- This works nicely for all datatypes with two exception:
+--
+-- * `ImportDecl` has a record constructor, which is currently not supported
+--   (support exists in ghc-8.0 but is not used by this module yet)
+-- * `Literal` has constructors with an extra `String` argument that is not
+--   used by `Language.Haskell.Exts.Simple.Pretty`. This module uses explicitly
+--   bidirectional pattern synonyms to support this type, but support for that
+--   is only available in ghc-7.10 and later.
+--
+-- __IMPORTANT__: if you require compatiblity with ghc 7.8, you should use the
+-- functions `charL`, `stringL` etc. for constructing `Literal` values!
 
 module Language.Haskell.Exts.Simple.Syntax (
     module Language.Haskell.Exts.Simple.Syntax,
@@ -375,29 +388,71 @@ pattern ParenA a = H.ParenA () (a :: Asst) :: Asst
 pattern WildCardA a = H.WildCardA () (a :: (Maybe Name)) :: Asst
 
 -- ** `H.Literal`
--- literals are extra redundant!
+
+-- | Beware that the constructors only work in a pattern context in ghc-7.8,
+-- because that version does not support explicitly bidirectional pattern
+-- synonyms.
+--
+-- For code that needs to work with ghc-7.8, we provide functions `charL`,
+-- `stringL`, `intL`, `fracL`, etc. for constructing `Literal` values.
+
 type Literal = H.Literal ()
+
+#if __GLASGOW_HASKELL__ <= 708
+#define where --
+#endif
 
 pattern Char a <- H.Char () (a :: Char) _ :: Literal
     where Char a = H.Char () a [a]
+charL :: Char -> Literal
+charL a = H.Char () a [a]
+
 pattern String a <- H.String () (a :: String) _ :: Literal
-    where String a = H.String () a a
+    where String a = stringL a
+stringL :: String -> Literal
+stringL a = H.String () a a
+
 pattern Int a <- H.Int () (a :: Integer) _ :: Literal
-    where Int a = H.Int () a (show a)
+    where Int a = intL a
+intL :: Integer -> Literal
+intL a = H.Int () a (show a)
+
 pattern Frac a <- H.Frac () (a :: Rational) _ :: Literal
-    where Frac a = H.Frac () a (show a)
+    where Frac a = fracL a
+fracL :: Rational -> Literal
+fracL a = H.Frac () a (show a)
+
 pattern PrimInt a <- H.PrimInt () (a :: Integer) _ :: Literal
-    where PrimInt a = H.PrimInt () a (show a)
+    where PrimInt a = primIntL a
+primIntL :: Integer -> Literal
+primIntL a = H.PrimInt () a (show a)
+
 pattern PrimWord a <- H.PrimWord () (a :: Integer) _ :: Literal
-    where PrimWord a = H.PrimWord () a (show a)
+    where PrimWord a = primWordL a
+primWordL :: Integer -> Literal
+primWordL a = H.PrimWord () a (show a)
+
 pattern PrimFloat a <- H.PrimFloat () (a :: Rational) _ :: Literal
-    where PrimFloat a = H.PrimFloat () a (show a)
+    where PrimFloat a = primFloatL a
+primFloatL :: Rational -> Literal
+primFloatL a = H.PrimFloat () a (show (fromRational a :: Float))
+
 pattern PrimDouble a <- H.PrimDouble () (a :: Rational) _ :: Literal
-    where PrimDouble a = H.PrimDouble () a (show a)
+    where PrimDouble a = primDoubleL a
+primDoubleL :: Rational -> Literal
+primDoubleL a = H.PrimDouble () a (show (fromRational a :: Double))
+
 pattern PrimChar a <- H.PrimChar () (a :: Char) _ :: Literal
-    where PrimChar a = H.PrimChar () a (show a)
+    where PrimChar a = primCharL a
+primCharL :: Char -> Literal
+primCharL a = H.PrimChar () a [a]
+
 pattern PrimString a <- H.PrimString () (a :: String) _ :: Literal
-    where PrimString a = H.PrimString () a (show a)
+    where PrimString a = primStringL a
+primStringL :: String -> Literal
+primStringL a = H.PrimString () a a
+
+#undef where
 
 -- ** `H.Sign`
 type Sign = H.Sign ()

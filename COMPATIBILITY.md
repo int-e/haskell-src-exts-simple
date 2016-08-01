@@ -16,4 +16,5 @@ haskell-src-exts-simple provides a simplified view of the annotated AST in haske
 
 ## ghc versions
 
-* haskell-src-exts-simple requires ghc-7.10 or later, because it relies on explicitly bidirectional pattern synonyms for literals
+* haskell-src-exts-simple requires ghc-7.8 or later
+* Note that with ghc-7.8, the constructors of the `Language.Haskell.Exts.Simple.Syntax.Literal` type are only available for pattern matchin, because construction relies on explicitly bidirectional pattern synonyms for literals. For ghc-7.8 compatibility, you should use the `*L` (`intL` etc.) functions for constructing `Literal` values.

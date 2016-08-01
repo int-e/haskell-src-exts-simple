@@ -15,8 +15,9 @@ import Language.Haskell.Exts.Fixity (
  )
 import Language.Haskell.Exts.Simple.Syntax
 import Language.Haskell.Exts.SrcLoc
+import Control.Monad
 
 -- * Functions
 
 applyFixities :: (AppFixity ast, Functor ast, Monad m) => [Fixity] -> ast () -> m (ast ())
-applyFixities fixs = fmap (fmap (const ())) . H.applyFixities fixs . fmap (const noSrcSpan)
+applyFixities fixs = liftM (fmap (const ())) . H.applyFixities fixs . fmap (const noSrcSpan)

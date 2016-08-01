@@ -46,6 +46,7 @@ library
         Language.Haskell.Exts.Simple.Syntax
     -- other-modules:       
     other-extensions:
+        CPP,
         PatternSynonyms,
         ScopedTypeVariables
     build-depends:
