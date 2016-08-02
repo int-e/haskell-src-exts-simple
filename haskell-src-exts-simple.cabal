@@ -1,5 +1,5 @@
 name:                haskell-src-exts-simple
-version:             1.18.0.0
+version:             1.18.0.1
 synopsis:            A simplified view on the haskell-src-exts AST
 description:
     This package provides a shim for haskell-src-exts (HSE), exposing the
@@ -13,10 +13,13 @@ description:
     .
     See "Language.Haskell.Exts.Simple" for further information.
     .
-    __Versioning notice__: To be able to track the haskell-src-exts version
+    __Versioning policy__: To be able to track the haskell-src-exts version
     numbers conveniently, the first __three__ components of the version
     will be treated as the major version, followed by the minor version
     as usual.
+    .
+    __GHC compatibility__: With ghc-7.8, some constructors only work as
+    patterns. See "Language.Haskell.Exts.Simple.Syntax#t:Literal"
 license:             MIT
 license-file:        LICENSE
 author:              Bertram Felgenhauer
@@ -50,7 +53,7 @@ library
         PatternSynonyms,
         ScopedTypeVariables
     build-depends:
-        base >= 4.8 && < 5,
+        base >= 4.7 && < 5,
         haskell-src-exts >= 1.18 && < 1.19
     hs-source-dirs:      src
     default-language:    Haskell2010
