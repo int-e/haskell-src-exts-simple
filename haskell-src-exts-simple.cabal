@@ -1,25 +1,11 @@
 name:                haskell-src-exts-simple
-version:             1.18.0.1
+version:             1.18.0.1.1
 synopsis:            A simplified view on the haskell-src-exts AST
 description:
     This package provides a shim for haskell-src-exts (HSE), exposing the
-    same AST but without annotations.
+    same AST but without annotations, using ghc's pattern synonyms.
     .
-    This package is useful for synthesizing and manipulating HSE ASTs
-    that don't carry source location information. It may also aid
-    in porting packages from haskell-src-exts 1.17 to 1.18, but it
-    is not a drop-in replacement for the old annotation-free AST.
-    See COMPATIBILITY.md for details.
-    .
-    See "Language.Haskell.Exts.Simple" for further information.
-    .
-    __Versioning policy__: To be able to track the haskell-src-exts version
-    numbers conveniently, the first __three__ components of the version
-    will be treated as the major version, followed by the minor version
-    as usual.
-    .
-    __GHC compatibility__: With ghc-7.8, some constructors only work as
-    patterns. See "Language.Haskell.Exts.Simple.Syntax#t:Literal"
+    See README.md for further information and compatibility considerations.
 license:             MIT
 license-file:        LICENSE
 author:              Bertram Felgenhauer
@@ -29,7 +15,6 @@ category:            Development
 build-type:          Simple
 extra-source-files:
     README.md,
-    COMPATIBILITY.md,
     CHANGELOG.md
 homepage:            https://github.com/int-e/haskell-src-exts-simple
 cabal-version:       >=1.10
