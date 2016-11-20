@@ -1,5 +1,10 @@
 # Revision history for haskell-src-exts-simple
 
+## 1.19.0.0    -- 2016-11-20
+
+* support haskell-src-exts 1.19.0
+* implement `Language.Haskell.Exts.Simple.Syntax.ImportDecl` as a record pattern synonym for ghc-8.0
+
 ## 1.18.0.1.1  -- 2016-08-05
 
 * package description should now look fine on hackage

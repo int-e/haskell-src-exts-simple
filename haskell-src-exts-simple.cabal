@@ -1,5 +1,5 @@
 name:                haskell-src-exts-simple
-version:             1.18.0.1.1
+version:             1.19.0.0
 synopsis:            A simplified view on the haskell-src-exts AST
 description:
     This package provides a shim for haskell-src-exts (HSE), exposing the

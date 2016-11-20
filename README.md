@@ -50,3 +50,7 @@ AST provided by earlier versions of haskell-src-exts:
   explicitly bidirectional pattern synonyms for literals. For ghc-7.8
   compatibility, you should use the `*L` (`intL` etc.) functions for
   constructing `Literal` values.
+* Support for record pattern synonyms was added in ghc-8.0. Therefore,
+  with ghc-7.10 and earlier, the constructor of the
+  `Language.Haskell.Exts.Simple.Syntax.ImportDecl` type is exported as
+  a plain constructor, and the selectors as functions.
