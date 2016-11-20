@@ -15,8 +15,10 @@
 --
 -- This works nicely for all datatypes with two exception:
 --
--- * `ImportDecl` has a record constructor, which is currently not supported
---   (support exists in ghc-8.0 but is not used by this module yet)
+-- * `ImportDecl` has a record constructor. Record type synonyms are only
+--   supported ghc-8.0 and later, so for ghc-7.10 and earlier, the
+--   constructor is exported as a plain constructor, and the record fields
+--   as function.
 -- * `Literal` has constructors with an extra `String` argument that is not
 --   used by `Language.Haskell.Exts.Simple.Pretty`. This module uses explicitly
 --   bidirectional pattern synonyms to support this type, but support for that
@@ -116,7 +118,8 @@ pattern PatternNamespace = H.PatternNamespace () :: Namespace
 
 -- ** `H.ImportDecl`
 type ImportDecl = H.ImportDecl ()
--- | Note, this is originally a record constructor, but ghc-7.10 does not support record pattern synonyms. For now, the selectors are exported as functions.
+-- | Note, this is originally a record constructor, and we use a pattern record synonym for ghc-8.0. But for earlier ghc versions, `ImportDecl` is a plain pattern synonym, and the selectors are exported as functions.
+#if __GLASGOW_HASKELL__ < 800
 pattern ImportDecl a b c d e f g = H.ImportDecl () (a :: ModuleName) (b :: Bool) (c :: Bool) (d :: Bool) (e :: Maybe String) (f :: Maybe ModuleName) (g :: Maybe ImportSpecList) :: ImportDecl
 importModule :: ImportDecl -> ModuleName
 importModule = H.importModule
@@ -132,6 +135,10 @@ importAs :: ImportDecl -> Maybe ModuleName
 importAs = H.importAs
 importSpecs :: ImportDecl -> Maybe ImportSpecList
 importSpecs = H.importSpecs
+#else
+pattern ImportDecl { importModule, importQualified, importSrc, importSafe, importPkg, importAs, importSpecs } =
+    H.ImportDecl () importModule importQualified importSrc importSafe importPkg importAs importSpecs :: ImportDecl
+#endif
 
 -- ** `H.ImportSpecList`
 type ImportSpecList = H.ImportSpecList ()
