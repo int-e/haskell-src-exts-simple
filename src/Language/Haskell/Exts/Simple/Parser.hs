@@ -2,7 +2,7 @@
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 -- |
--- This module reexports "Language.Haskell.Exts.Parser" with adaptations.
+-- This module partially reexports "Language.Haskell.Exts.Parser" with adaptations.
 --
 -- __IMPORTANT__: if you require compatiblity with ghc 7.8, you should use the
 -- function `listOf` for constructing `ListOf` values!
@@ -108,3 +108,46 @@ parseImportDeclWithMode m = fmap (fmap (const ())) . H.parseImportDeclWithMode m
 
 getTopPragmas :: String -> ParseResult [ModulePragma]
 getTopPragmas = fmap (fmap (fmap (const ()))) . H.getTopPragmas
+
+-- omitted: normalParser ::
+--               AppFixity a =>
+--               P (a SrcSpanInfo) -> Maybe [Fixity] -> P (a SrcSpanInfo)
+
+-- omitted: normalParserNoFixity ::
+--                     P (a SrcSpanInfo) -> Maybe [Fixity] -> P (a SrcSpanInfo)
+
+-- omitted: parseModuleWithComments ::
+--                        ParseMode -> String -> ParseResult (Module SrcSpanInfo, [Comment])
+
+-- omitted: parseExpWithComments ::
+--                     ParseMode -> String -> ParseResult (Exp SrcSpanInfo, [Comment])
+
+-- omitted: parsePatWithComments ::
+--                     ParseMode -> String -> ParseResult (Pat SrcSpanInfo, [Comment])
+
+-- omitted: parseDeclWithComments ::
+--                      ParseMode -> String -> ParseResult (Decl SrcSpanInfo, [Comment])
+
+-- omitted: parseTypeWithComments ::
+--                      ParseMode -> String -> ParseResult (Type SrcSpanInfo, [Comment])
+
+-- omitted: parseStmt :: String -> ParseResult (Stmt SrcSpanInfo)
+
+-- omitted: parseStmtWithMode ::
+--                  ParseMode -> String -> ParseResult (Stmt SrcSpanInfo)
+
+-- omitted: parseStmtWithComments ::
+--                      ParseMode -> String -> ParseResult (Stmt SrcSpanInfo, [Comment])
+
+-- omitted: parseImportDeclWithComments ::
+--                            ParseMode ->
+--                              String -> ParseResult (ImportDecl SrcSpanInfo, [Comment])
+
+-- omitted: nglistParserNoFixity ::
+--                     P ([a SrcSpanInfo], [SrcSpan], SrcSpanInfo) ->
+--                       Maybe [Fixity] -> P (NonGreedy (ListOf (a SrcSpanInfo)))
+
+-- omitted: data NonGreedy a
+
+-- omitted: toListOf :: ([a], [SrcSpan], SrcSpanInfo) -> ListOf a
+

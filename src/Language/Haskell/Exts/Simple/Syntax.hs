@@ -52,6 +52,7 @@ pattern FunCon = H.FunCon () :: SpecialCon
 pattern TupleCon a b = H.TupleCon () (a :: Boxed) (b :: Int) :: SpecialCon
 pattern Cons = H.Cons () :: SpecialCon
 pattern UnboxedSingleCon = H.UnboxedSingleCon () :: SpecialCon
+pattern ExprHole = H.ExprHole () :: SpecialCon
 
 -- ** `H.QName`
 type QName = H.QName ()
@@ -162,20 +163,20 @@ type Decl = H.Decl ()
 pattern TypeDecl a b = H.TypeDecl () (a :: DeclHead) (b :: Type) :: Decl
 pattern TypeFamDecl a b c = H.TypeFamDecl () (a :: DeclHead) (b :: (Maybe ResultSig)) (c :: (Maybe InjectivityInfo)) :: Decl
 pattern ClosedTypeFamDecl a b c d = H.ClosedTypeFamDecl () (a :: DeclHead) (b :: (Maybe ResultSig)) (c :: (Maybe InjectivityInfo)) (d :: [TypeEqn]) :: Decl
-pattern DataDecl a b c d e = H.DataDecl () (a :: DataOrNew) (b :: (Maybe Context)) (c :: DeclHead) (d :: [QualConDecl]) (e :: (Maybe Deriving)) :: Decl
-pattern GDataDecl a b c d e f = H.GDataDecl () (a :: DataOrNew) (b :: (Maybe Context)) (c :: DeclHead) (d :: (Maybe Kind)) (e :: [GadtDecl]) (f :: (Maybe Deriving)) :: Decl
+pattern DataDecl a b c d e = H.DataDecl () (a :: DataOrNew) (b :: (Maybe Context)) (c :: DeclHead) (d :: [QualConDecl]) (e :: [Deriving]) :: Decl
+pattern GDataDecl a b c d e f = H.GDataDecl () (a :: DataOrNew) (b :: (Maybe Context)) (c :: DeclHead) (d :: (Maybe Kind)) (e :: [GadtDecl]) (f :: [Deriving]) :: Decl
 pattern DataFamDecl a b c = H.DataFamDecl () (a :: (Maybe Context)) (b :: DeclHead) (c :: (Maybe ResultSig)) :: Decl
 pattern TypeInsDecl a b = H.TypeInsDecl () (a :: Type) (b :: Type) :: Decl
-pattern DataInsDecl a b c d = H.DataInsDecl () (a :: DataOrNew) (b :: Type) (c :: [QualConDecl]) (d :: (Maybe Deriving)) :: Decl
-pattern GDataInsDecl a b c d e = H.GDataInsDecl () (a :: DataOrNew) (b :: Type) (c :: (Maybe Kind)) (d :: [GadtDecl]) (e :: (Maybe Deriving)) :: Decl
+pattern DataInsDecl a b c d = H.DataInsDecl () (a :: DataOrNew) (b :: Type) (c :: [QualConDecl]) (d :: [Deriving]) :: Decl
+pattern GDataInsDecl a b c d e = H.GDataInsDecl () (a :: DataOrNew) (b :: Type) (c :: (Maybe Kind)) (d :: [GadtDecl]) (e :: [Deriving]) :: Decl
 pattern ClassDecl a b c d = H.ClassDecl () (a :: (Maybe Context)) (b :: DeclHead) (c :: [FunDep]) (d :: (Maybe [ClassDecl])) :: Decl
 pattern InstDecl a b c = H.InstDecl () (a :: (Maybe Overlap)) (b :: InstRule) (c :: (Maybe [InstDecl])) :: Decl
-pattern DerivDecl a b = H.DerivDecl () (a :: (Maybe Overlap)) (b :: InstRule) :: Decl
+pattern DerivDecl a b c = H.DerivDecl () (a :: (Maybe DerivStrategy)) (b :: (Maybe Overlap)) (c :: InstRule) :: Decl
 pattern InfixDecl a b c = H.InfixDecl () (a :: Assoc) (b :: (Maybe Int)) (c :: [Op]) :: Decl
 pattern DefaultDecl a = H.DefaultDecl () (a :: [Type]) :: Decl
 pattern SpliceDecl a = H.SpliceDecl () (a :: Exp) :: Decl
 pattern TypeSig a b = H.TypeSig () (a :: [Name]) (b :: Type) :: Decl
-pattern PatSynSig a b c d e = H.PatSynSig () (a :: Name) (b :: (Maybe [TyVarBind])) (c :: (Maybe Context)) (d :: (Maybe Context)) (e :: Type) :: Decl
+pattern PatSynSig a b c d e = H.PatSynSig () (a :: [Name]) (b :: (Maybe [TyVarBind])) (c :: (Maybe Context)) (d :: (Maybe Context)) (e :: Type) :: Decl
 pattern FunBind a = H.FunBind () (a :: [Match]) :: Decl
 pattern PatBind a b c = H.PatBind () (a :: Pat) (b :: Rhs) (c :: (Maybe Binds)) :: Decl
 pattern PatSyn a b c = H.PatSyn () (a :: Pat) (b :: Pat) (c :: PatternSynDirection) :: Decl
@@ -192,6 +193,7 @@ pattern InstSig a = H.InstSig () (a :: InstRule) :: Decl
 pattern AnnPragma a = H.AnnPragma () (a :: Annotation) :: Decl
 pattern MinimalPragma a = H.MinimalPragma () (a :: (Maybe BooleanFormula)) :: Decl
 pattern RoleAnnotDecl a b = H.RoleAnnotDecl () (a :: QName) (b :: [Role]) :: Decl
+pattern CompletePragma a b = H.CompletePragma () (a :: [Name]) (b :: (Maybe QName)) :: Decl
 
 -- ** `H.PatternSynDirection`
 type PatternSynDirection = H.PatternSynDirection ()
@@ -258,7 +260,13 @@ pattern IHApp a b = H.IHApp () (a :: InstHead) (b :: Type) :: InstHead
 
 -- ** `H.Deriving`
 type Deriving = H.Deriving ()
-pattern Deriving a = H.Deriving () (a :: [InstRule]) :: Deriving
+pattern Deriving a b = H.Deriving () (a :: (Maybe DerivStrategy)) (b :: [InstRule]) :: Deriving
+
+-- ** `H.DerivStrategy`
+type DerivStrategy = H.DerivStrategy ()
+pattern DerivStock = H.DerivStock () :: DerivStrategy
+pattern DerivAnyclass = H.DerivAnyclass () :: DerivStrategy
+pattern DerivNewtype = H.DerivNewtype () :: DerivStrategy
 
 -- ** `H.Binds`
 type Binds = H.Binds ()
@@ -304,8 +312,8 @@ pattern ClsDefSig a b = H.ClsDefSig () (a :: Name) (b :: Type) :: ClassDecl
 type InstDecl = H.InstDecl ()
 pattern InsDecl a = H.InsDecl () (a :: Decl) :: InstDecl
 pattern InsType a b = H.InsType () (a :: Type) (b :: Type) :: InstDecl
-pattern InsData a b c d = H.InsData () (a :: DataOrNew) (b :: Type) (c :: [QualConDecl]) (d :: (Maybe Deriving)) :: InstDecl
-pattern InsGData a b c d e = H.InsGData () (a :: DataOrNew) (b :: Type) (c :: (Maybe Kind)) (d :: [GadtDecl]) (e :: (Maybe Deriving)) :: InstDecl
+pattern InsData a b c d = H.InsData () (a :: DataOrNew) (b :: Type) (c :: [QualConDecl]) (d :: [Deriving]) :: InstDecl
+pattern InsGData a b c d e = H.InsGData () (a :: DataOrNew) (b :: Type) (c :: (Maybe Kind)) (d :: [GadtDecl]) (e :: [Deriving]) :: InstDecl
 
 -- ** `H.BangType`
 type BangType = H.BangType ()
@@ -333,13 +341,14 @@ type Type = H.Type ()
 pattern TyForall a b c = H.TyForall () (a :: (Maybe [TyVarBind])) (b :: (Maybe Context)) (c :: Type) :: Type
 pattern TyFun a b = H.TyFun () (a :: Type) (b :: Type) :: Type
 pattern TyTuple a b = H.TyTuple () (a :: Boxed) (b :: [Type]) :: Type
+pattern TyUnboxedSum a = H.TyUnboxedSum () (a :: [Type]) :: Type
 pattern TyList a = H.TyList () (a :: Type) :: Type
 pattern TyParArray a = H.TyParArray () (a :: Type) :: Type
 pattern TyApp a b = H.TyApp () (a :: Type) (b :: Type) :: Type
 pattern TyVar a = H.TyVar () (a :: Name) :: Type
 pattern TyCon a = H.TyCon () (a :: QName) :: Type
 pattern TyParen a = H.TyParen () (a :: Type) :: Type
-pattern TyInfix a b c = H.TyInfix () (a :: Type) (b :: QName) (c :: Type) :: Type
+pattern TyInfix a b c = H.TyInfix () (a :: Type) (b :: MaybePromotedName) (c :: Type) :: Type
 pattern TyKind a b = H.TyKind () (a :: Type) (b :: Kind) :: Type
 pattern TyPromoted a = H.TyPromoted () (a :: Promoted) :: Type
 pattern TyEquals a b = H.TyEquals () (a :: Type) (b :: Type) :: Type
@@ -347,6 +356,11 @@ pattern TySplice a = H.TySplice () (a :: Splice) :: Type
 pattern TyBang a b c = H.TyBang () (a :: BangType) (b :: Unpackedness) (c :: Type) :: Type
 pattern TyWildCard a = H.TyWildCard () (a :: (Maybe Name)) :: Type
 pattern TyQuasiQuote a b = H.TyQuasiQuote () (a :: String) (b :: String) :: Type
+
+-- ** `H.MaybePromotedName`
+type MaybePromotedName = H.MaybePromotedName ()
+pattern PromotedName a = H.PromotedName () (a :: QName) :: MaybePromotedName
+pattern UnpromotedName a = H.UnpromotedName () (a :: QName) :: MaybePromotedName
 
 -- ** `H.Promoted`
 type Promoted = H.Promoted ()
@@ -484,6 +498,7 @@ pattern Case a b = H.Case () (a :: Exp) (b :: [Alt]) :: Exp
 pattern Do a = H.Do () (a :: [Stmt]) :: Exp
 pattern MDo a = H.MDo () (a :: [Stmt]) :: Exp
 pattern Tuple a b = H.Tuple () (a :: Boxed) (b :: [Exp]) :: Exp
+pattern UnboxedSum a b c = H.UnboxedSum () (a :: Int) (b :: Int) (c :: Exp) :: Exp
 pattern TupleSection a b = H.TupleSection () (a :: Boxed) (b :: [Maybe Exp]) :: Exp
 pattern List a = H.List () (a :: [Exp]) :: Exp
 pattern ParArray a = H.ParArray () (a :: [Exp]) :: Exp
@@ -522,7 +537,6 @@ pattern RightArrApp a b = H.RightArrApp () (a :: Exp) (b :: Exp) :: Exp
 pattern LeftArrHighApp a b = H.LeftArrHighApp () (a :: Exp) (b :: Exp) :: Exp
 pattern RightArrHighApp a b = H.RightArrHighApp () (a :: Exp) (b :: Exp) :: Exp
 pattern LCase a = H.LCase () (a :: [Alt]) :: Exp
-pattern ExprHole = H.ExprHole () :: Exp
 
 -- ** `H.XName`
 type XName = H.XName ()
@@ -574,6 +588,9 @@ pattern AnnModulePragma a = H.AnnModulePragma () (a :: Annotation) :: ModulePrag
 type Overlap = H.Overlap ()
 pattern NoOverlap = H.NoOverlap () :: Overlap
 pattern Overlap = H.Overlap () :: Overlap
+pattern Overlapping = H.Overlapping () :: Overlap
+pattern Overlaps = H.Overlaps () :: Overlap
+pattern Overlappable = H.Overlappable () :: Overlap
 pattern Incoherent = H.Incoherent () :: Overlap
 
 -- ** `H.Activation`
@@ -603,6 +620,7 @@ pattern PNPlusK a b = H.PNPlusK () (a :: Name) (b :: Integer) :: Pat
 pattern PInfixApp a b c = H.PInfixApp () (a :: Pat) (b :: QName) (c :: Pat) :: Pat
 pattern PApp a b = H.PApp () (a :: QName) (b :: [Pat]) :: Pat
 pattern PTuple a b = H.PTuple () (a :: Boxed) (b :: [Pat]) :: Pat
+pattern PUnboxedSum a b c = H.PUnboxedSum () (a :: Int) (b :: Int) (c :: Pat) :: Pat
 pattern PList a = H.PList () (a :: [Pat]) :: Pat
 pattern PParen a = H.PParen () (a :: Pat) :: Pat
 pattern PRec a b = H.PRec () (a :: QName) (b :: [PatField]) :: Pat
@@ -617,6 +635,7 @@ pattern PXETag a b c = H.PXETag () (a :: XName) (b :: [PXAttr]) (c :: (Maybe Pat
 pattern PXPcdata a = H.PXPcdata () (a :: String) :: Pat
 pattern PXPatTag a = H.PXPatTag () (a :: Pat) :: Pat
 pattern PXRPats a = H.PXRPats () (a :: [RPat]) :: Pat
+pattern PSplice a = H.PSplice () (a :: Splice) :: Pat
 pattern PQuasiQuote a b = H.PQuasiQuote () (a :: String) (b :: String) :: Pat
 pattern PBangPat a = H.PBangPat () (a :: Pat) :: Pat
 
@@ -715,7 +734,10 @@ bang_name = H.bang_name ()
 dot_name = H.dot_name ()
 star_name = H.star_name ()
 
-export_name, safe_name, unsafe_name, interruptible_name, threadsafe_name, stdcall_name, ccall_name, cplusplus_name, dotnet_name, jvm_name, js_name, javascript_name, capi_name, forall_name, family_name, role_name :: Name
+hole_name :: QName
+hole_name = H.hole_name ()
+
+export_name, safe_name, unsafe_name, interruptible_name, threadsafe_name, stdcall_name, ccall_name, cplusplus_name, dotnet_name, jvm_name, js_name, javascript_name, capi_name, forall_name, family_name, role_name, stock_name, anyclass_name :: Name
 export_name = H.export_name ()
 safe_name = H.safe_name ()
 unsafe_name = H.unsafe_name ()
@@ -732,6 +754,8 @@ capi_name = H.capi_name ()
 forall_name = H.forall_name ()
 family_name = H.family_name ()
 role_name = H.role_name ()
+stock_name = H.stock_name ()
+anyclass_name = H.anyclass_name ()
 
 unit_tycon_name, fun_tycon_name, list_tycon_name, unboxed_singleton_tycon_name :: QName
 unit_tycon_name = H.unit_tycon_name ()
