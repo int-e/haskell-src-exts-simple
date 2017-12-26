@@ -109,45 +109,45 @@ parseImportDeclWithMode m = fmap (fmap (const ())) . H.parseImportDeclWithMode m
 getTopPragmas :: String -> ParseResult [ModulePragma]
 getTopPragmas = fmap (fmap (fmap (const ()))) . H.getTopPragmas
 
--- omitted: normalParser ::
---               AppFixity a =>
---               P (a SrcSpanInfo) -> Maybe [Fixity] -> P (a SrcSpanInfo)
-
--- omitted: normalParserNoFixity ::
---                     P (a SrcSpanInfo) -> Maybe [Fixity] -> P (a SrcSpanInfo)
-
--- omitted: parseModuleWithComments ::
---                        ParseMode -> String -> ParseResult (Module SrcSpanInfo, [Comment])
-
--- omitted: parseExpWithComments ::
---                     ParseMode -> String -> ParseResult (Exp SrcSpanInfo, [Comment])
-
--- omitted: parsePatWithComments ::
---                     ParseMode -> String -> ParseResult (Pat SrcSpanInfo, [Comment])
-
--- omitted: parseDeclWithComments ::
---                      ParseMode -> String -> ParseResult (Decl SrcSpanInfo, [Comment])
-
--- omitted: parseTypeWithComments ::
---                      ParseMode -> String -> ParseResult (Type SrcSpanInfo, [Comment])
-
--- omitted: parseStmt :: String -> ParseResult (Stmt SrcSpanInfo)
-
--- omitted: parseStmtWithMode ::
---                  ParseMode -> String -> ParseResult (Stmt SrcSpanInfo)
-
--- omitted: parseStmtWithComments ::
---                      ParseMode -> String -> ParseResult (Stmt SrcSpanInfo, [Comment])
-
--- omitted: parseImportDeclWithComments ::
---                            ParseMode ->
---                              String -> ParseResult (ImportDecl SrcSpanInfo, [Comment])
-
--- omitted: nglistParserNoFixity ::
---                     P ([a SrcSpanInfo], [SrcSpan], SrcSpanInfo) ->
---                       Maybe [Fixity] -> P (NonGreedy (ListOf (a SrcSpanInfo)))
+-- omitted parsing functions, new in haskell-source-exts-1.20:
+--
+-- normalParser :: AppFixity a =>
+--     P (a SrcSpanInfo) -> Maybe [Fixity] -> P (a SrcSpanInfo)
+--
+-- normalParserNoFixity ::
+--     P (a SrcSpanInfo) -> Maybe [Fixity] -> P (a SrcSpanInfo)
+--
+-- parseModuleWithComments ::
+--     ParseMode -> String -> ParseResult (Module SrcSpanInfo, [Comment])
+--
+-- parseExpWithComments ::
+--     ParseMode -> String -> ParseResult (Exp SrcSpanInfo, [Comment])
+--
+-- parsePatWithComments ::
+--     ParseMode -> String -> ParseResult (Pat SrcSpanInfo, [Comment])
+--
+-- parseDeclWithComments ::
+--     ParseMode -> String -> ParseResult (Decl SrcSpanInfo, [Comment])
+--
+-- parseTypeWithComments ::
+--     ParseMode -> String -> ParseResult (Type SrcSpanInfo, [Comment])
+--
+-- parseStmt ::
+--     String -> ParseResult (Stmt SrcSpanInfo)
+--
+-- parseStmtWithMode ::
+--     ParseMode -> String -> ParseResult (Stmt SrcSpanInfo)
+--
+-- parseStmtWithComments ::
+--     ParseMode -> String -> ParseResult (Stmt SrcSpanInfo, [Comment])
+--
+--     ParseMode -> String -> ParseResult (ImportDecl SrcSpanInfo, [Comment])
+-- parseImportDeclWithComments ::
+--
+-- nglistParserNoFixity ::
+--     P ([a SrcSpanInfo], [SrcSpan], SrcSpanInfo) ->
+--     Maybe [Fixity] -> P (NonGreedy (ListOf (a SrcSpanInfo)))
 
 -- omitted: data NonGreedy a
 
 -- omitted: toListOf :: ([a], [SrcSpan], SrcSpanInfo) -> ListOf a
-
