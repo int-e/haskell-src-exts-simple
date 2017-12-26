@@ -111,12 +111,6 @@ getTopPragmas = fmap (fmap (fmap (const ()))) . H.getTopPragmas
 
 -- omitted parsing functions, new in haskell-source-exts-1.20:
 --
--- normalParser :: AppFixity a =>
---     P (a SrcSpanInfo) -> Maybe [Fixity] -> P (a SrcSpanInfo)
---
--- normalParserNoFixity ::
---     P (a SrcSpanInfo) -> Maybe [Fixity] -> P (a SrcSpanInfo)
---
 -- parseModuleWithComments ::
 --     ParseMode -> String -> ParseResult (Module SrcSpanInfo, [Comment])
 --
@@ -141,13 +135,7 @@ getTopPragmas = fmap (fmap (fmap (const ()))) . H.getTopPragmas
 -- parseStmtWithComments ::
 --     ParseMode -> String -> ParseResult (Stmt SrcSpanInfo, [Comment])
 --
---     ParseMode -> String -> ParseResult (ImportDecl SrcSpanInfo, [Comment])
 -- parseImportDeclWithComments ::
---
--- nglistParserNoFixity ::
---     P ([a SrcSpanInfo], [SrcSpan], SrcSpanInfo) ->
---     Maybe [Fixity] -> P (NonGreedy (ListOf (a SrcSpanInfo)))
+--     ParseMode -> String -> ParseResult (ImportDecl SrcSpanInfo, [Comment])
 
 -- omitted: data NonGreedy a
-
--- omitted: toListOf :: ([a], [SrcSpan], SrcSpanInfo) -> ListOf a
