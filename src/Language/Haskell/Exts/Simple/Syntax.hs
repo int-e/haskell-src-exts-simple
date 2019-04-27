@@ -176,7 +176,7 @@ pattern InfixDecl a b c = H.InfixDecl () (a :: Assoc) (b :: (Maybe Int)) (c :: [
 pattern DefaultDecl a = H.DefaultDecl () (a :: [Type]) :: Decl
 pattern SpliceDecl a = H.SpliceDecl () (a :: Exp) :: Decl
 pattern TypeSig a b = H.TypeSig () (a :: [Name]) (b :: Type) :: Decl
-pattern PatSynSig a b c d e = H.PatSynSig () (a :: [Name]) (b :: (Maybe [TyVarBind])) (c :: (Maybe Context)) (d :: (Maybe Context)) (e :: Type) :: Decl
+pattern PatSynSig a b c d e f = H.PatSynSig () (a :: [Name]) (b :: (Maybe [TyVarBind])) (c :: (Maybe Context)) (d :: (Maybe [TyVarBind])) (e :: (Maybe Context)) (f :: Type) :: Decl
 pattern FunBind a = H.FunBind () (a :: [Match]) :: Decl
 pattern PatBind a b c = H.PatBind () (a :: Pat) (b :: Rhs) (c :: (Maybe Binds)) :: Decl
 pattern PatSyn a b c = H.PatSyn () (a :: Pat) (b :: Pat) (c :: PatternSynDirection) :: Decl
@@ -267,6 +267,7 @@ type DerivStrategy = H.DerivStrategy ()
 pattern DerivStock = H.DerivStock () :: DerivStrategy
 pattern DerivAnyclass = H.DerivAnyclass () :: DerivStrategy
 pattern DerivNewtype = H.DerivNewtype () :: DerivStrategy
+pattern DerivVia a = H.DerivVia () (a :: Type) :: DerivStrategy
 
 -- ** `H.Binds`
 type Binds = H.Binds ()
@@ -298,7 +299,7 @@ pattern FieldDecl a b = H.FieldDecl () (a :: [Name]) (b :: Type) :: FieldDecl
 
 -- ** `H.GadtDecl`
 type GadtDecl = H.GadtDecl ()
-pattern GadtDecl a b c = H.GadtDecl () (a :: Name) (b :: (Maybe [FieldDecl])) (c :: Type) :: GadtDecl
+pattern GadtDecl a b c d e = H.GadtDecl () (a :: Name) (b :: (Maybe [TyVarBind])) (c :: (Maybe Context)) (d :: (Maybe [FieldDecl])) (e :: Type) :: GadtDecl
 
 -- ** `H.ClassDecl`
 type ClassDecl = H.ClassDecl ()
@@ -339,6 +340,7 @@ pattern GuardedRhs a b = H.GuardedRhs () (a :: [Stmt]) (b :: Exp) :: GuardedRhs
 -- ** `H.Type`
 type Type = H.Type ()
 pattern TyForall a b c = H.TyForall () (a :: (Maybe [TyVarBind])) (b :: (Maybe Context)) (c :: Type) :: Type
+pattern TyStar = H.TyStar () :: Type
 pattern TyFun a b = H.TyFun () (a :: Type) (b :: Type) :: Type
 pattern TyTuple a b = H.TyTuple () (a :: Boxed) (b :: [Type]) :: Type
 pattern TyUnboxedSum a = H.TyUnboxedSum () (a :: [Type]) :: Type
@@ -379,14 +381,9 @@ pattern KindedVar a b = H.KindedVar () (a :: Name) (b :: Kind) :: TyVarBind
 pattern UnkindedVar a = H.UnkindedVar () (a :: Name) :: TyVarBind
 
 -- ** `H.Kind`
+
+-- | Note that `Kind` is an alias for `Type` since haskell-src-exts-1.21.
 type Kind = H.Kind ()
-pattern KindStar = H.KindStar () :: Kind
-pattern KindFn a b = H.KindFn () (a :: Kind) (b :: Kind) :: Kind
-pattern KindParen a = H.KindParen () (a :: Kind) :: Kind
-pattern KindVar a = H.KindVar () (a :: QName) :: Kind
-pattern KindApp a b = H.KindApp () (a :: Kind) (b :: Kind) :: Kind
-pattern KindTuple a = H.KindTuple () (a :: [Kind]) :: Kind
-pattern KindList a = H.KindList () (a :: Kind) :: Kind
 
 -- ** `H.FunDep`
 type FunDep = H.FunDep ()
@@ -710,6 +707,9 @@ unit_con_name = H.unit_con_name ()
 tuple_con_name :: Boxed -> Int -> QName
 tuple_con_name = H.tuple_con_name ()
 
+list_con_name :: QName
+list_con_name = H.list_con_name ()
+
 list_cons_name :: QName
 list_cons_name = H.list_cons_name ()
 
@@ -737,7 +737,7 @@ star_name = H.star_name ()
 hole_name :: QName
 hole_name = H.hole_name ()
 
-export_name, safe_name, unsafe_name, interruptible_name, threadsafe_name, stdcall_name, ccall_name, cplusplus_name, dotnet_name, jvm_name, js_name, javascript_name, capi_name, forall_name, family_name, role_name, stock_name, anyclass_name :: Name
+export_name, safe_name, unsafe_name, interruptible_name, threadsafe_name, stdcall_name, ccall_name, cplusplus_name, dotnet_name, jvm_name, js_name, javascript_name, capi_name, forall_name, family_name, role_name, stock_name, anyclass_name, via_name :: Name
 export_name = H.export_name ()
 safe_name = H.safe_name ()
 unsafe_name = H.unsafe_name ()
@@ -756,6 +756,7 @@ family_name = H.family_name ()
 role_name = H.role_name ()
 stock_name = H.stock_name ()
 anyclass_name = H.anyclass_name ()
+via_name = H.via_name ()
 
 unit_tycon_name, fun_tycon_name, list_tycon_name, unboxed_singleton_tycon_name :: QName
 unit_tycon_name = H.unit_tycon_name ()

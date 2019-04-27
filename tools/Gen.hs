@@ -43,6 +43,9 @@ decl_ (DataDecl _ _ _ (DHApp _ (DHead _ (Ident _ n)) (UnkindedVar _ (Ident _ "l"
 decl_ (DataDecl _ _ _ dhead dcons _) =
     ["-- skipped: data " ++ prettyPrint dhead,
      ""]
+decl_ (TypeDecl _ dhead _) =
+    ["-- skipped: type " ++ prettyPrint dhead,
+     ""]
 decl_ (TypeSig _ ns (TyFun _ (TyVar _ (Ident _ "l")) t)) =
     [intercalate ", " ns' ++ " :: " ++ prettyPrint t'] ++
     [n ++ " = H." ++ n ++ " ()" | n <- ns'] ++

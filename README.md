@@ -20,6 +20,9 @@ from the PVP.
 
 ## Compatibility
 
+Since version 1.18, haskell-src-exts-simple has followed the changes in
+haskell-src-exts, without any attempt to keep backward compatibility.
+
 ### Comparison to haskell-src-exts 1.17 (as of version 1.18):
 
 haskell-src-exts-simple provides a simplified view of the annotated
