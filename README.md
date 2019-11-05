@@ -46,14 +46,4 @@ AST provided by earlier versions of haskell-src-exts:
 
 ### ghc compatibility
 
-* haskell-src-exts-simple requires ghc-7.8 or later
-* Note that with ghc-7.8, the constructors of the
-  `Language.Haskell.Exts.Simple.Syntax.Literal` type are only
-  available for pattern matching, because construction relies on
-  explicitly bidirectional pattern synonyms for literals. For ghc-7.8
-  compatibility, you should use the `*L` (`intL` etc.) functions for
-  constructing `Literal` values.
-* Support for record pattern synonyms was added in ghc-8.0. Therefore,
-  with ghc-7.10 and earlier, the constructor of the
-  `Language.Haskell.Exts.Simple.Syntax.ImportDecl` type is exported as
-  a plain constructor, and the selectors as functions.
+* haskell-src-exts-simple requires ghc-8.0 or later

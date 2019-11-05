@@ -12,20 +12,6 @@
 -- > type Name = H.Name ()
 -- > pattern Ident a = H.Ident () a
 -- > pattern Symbol a = H.Symbol () a
---
--- This works nicely for all datatypes with two exception:
---
--- * `ImportDecl` has a record constructor. Record type synonyms are only
---   supported ghc-8.0 and later, so for ghc-7.10 and earlier, the
---   constructor is exported as a plain constructor, and the record fields
---   as function.
--- * `Literal` has constructors with an extra `String` argument that is not
---   used by `Language.Haskell.Exts.Simple.Pretty`. This module uses explicitly
---   bidirectional pattern synonyms to support this type, but support for that
---   is only available in ghc-7.10 and later.
---
--- __IMPORTANT__: if you require compatiblity with ghc 7.8, you should use the
--- functions `charL`, `stringL` etc. for constructing `Literal` values!
 
 module Language.Haskell.Exts.Simple.Syntax (
     module Language.Haskell.Exts.Simple.Syntax,
@@ -119,27 +105,8 @@ pattern PatternNamespace = H.PatternNamespace () :: Namespace
 
 -- ** `H.ImportDecl`
 type ImportDecl = H.ImportDecl ()
--- | Note, this is originally a record constructor, and we use a pattern record synonym for ghc-8.0. But for earlier ghc versions, `ImportDecl` is a plain pattern synonym, and the selectors are exported as functions.
-#if __GLASGOW_HASKELL__ < 800
-pattern ImportDecl a b c d e f g = H.ImportDecl () (a :: ModuleName) (b :: Bool) (c :: Bool) (d :: Bool) (e :: Maybe String) (f :: Maybe ModuleName) (g :: Maybe ImportSpecList) :: ImportDecl
-importModule :: ImportDecl -> ModuleName
-importModule = H.importModule
-importQualified :: ImportDecl -> Bool
-importQualified = H.importQualified
-importSrc :: ImportDecl -> Bool
-importSrc = H.importSrc
-importSafe :: ImportDecl -> Bool
-importSafe = H.importSafe
-importPkg :: ImportDecl -> Maybe String
-importPkg = H.importPkg
-importAs :: ImportDecl -> Maybe ModuleName
-importAs = H.importAs
-importSpecs :: ImportDecl -> Maybe ImportSpecList
-importSpecs = H.importSpecs
-#else
 pattern ImportDecl { importModule, importQualified, importSrc, importSafe, importPkg, importAs, importSpecs } =
     H.ImportDecl () importModule importQualified importSrc importSafe importPkg importAs importSpecs :: ImportDecl
-#endif
 
 -- ** `H.ImportSpecList`
 type ImportSpecList = H.ImportSpecList ()
@@ -403,19 +370,7 @@ pattern IParam a b = H.IParam () (a :: IPName) (b :: Type) :: Asst
 pattern ParenA a = H.ParenA () (a :: Asst) :: Asst
 
 -- ** `H.Literal`
-
--- | Beware that the constructors only work in a pattern context in ghc-7.8,
--- because that version does not support explicitly bidirectional pattern
--- synonyms.
---
--- For code that needs to work with ghc-7.8, we provide functions `charL`,
--- `stringL`, `intL`, `fracL`, etc. for constructing `Literal` values.
-
 type Literal = H.Literal ()
-
-#if __GLASGOW_HASKELL__ <= 708
-#define where --
-#endif
 
 pattern Char a <- H.Char () (a :: Char) _ :: Literal
     where Char a = H.Char () a [a]

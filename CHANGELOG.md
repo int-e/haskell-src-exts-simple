@@ -3,10 +3,12 @@
 ## 1.22.0.0    -- 2019-11-05
 
 * support haskell-src-exts 1.22.0
+* clean up mentions of ghc < 8
 
-## 1.21.0.1    -- 2019-09-13
+## 1.21.1.0    -- 2019-09-13
 
 * support haskell-src-exts 1.21.1
+* require base >= 4.9 (and, consequently, ghc >= 8)
 
 ## 1.21.0.0    -- 2019-04-27
 
