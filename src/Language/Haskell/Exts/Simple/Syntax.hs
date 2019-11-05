@@ -175,6 +175,7 @@ pattern DerivDecl a b c = H.DerivDecl () (a :: (Maybe DerivStrategy)) (b :: (May
 pattern InfixDecl a b c = H.InfixDecl () (a :: Assoc) (b :: (Maybe Int)) (c :: [Op]) :: Decl
 pattern DefaultDecl a = H.DefaultDecl () (a :: [Type]) :: Decl
 pattern SpliceDecl a = H.SpliceDecl () (a :: Exp) :: Decl
+pattern TSpliceDecl a = H.TSpliceDecl () (a :: Exp) :: Decl
 pattern TypeSig a b = H.TypeSig () (a :: [Name]) (b :: Type) :: Decl
 pattern PatSynSig a b c d e f = H.PatSynSig () (a :: [Name]) (b :: (Maybe [TyVarBind])) (c :: (Maybe Context)) (d :: (Maybe [TyVarBind])) (e :: (Maybe Context)) (f :: Type) :: Decl
 pattern FunBind a = H.FunBind () (a :: [Match]) :: Decl
@@ -397,13 +398,9 @@ pattern CxEmpty = H.CxEmpty () :: Context
 
 -- ** `H.Asst`
 type Asst = H.Asst ()
-pattern ClassA a b = H.ClassA () (a :: QName) (b :: [Type]) :: Asst
-pattern AppA a b = H.AppA () (a :: Name) (b :: [Type]) :: Asst
-pattern InfixA a b c = H.InfixA () (a :: Type) (b :: QName) (c :: Type) :: Asst
+pattern TypeA a = H.TypeA () (a :: Type) :: Asst
 pattern IParam a b = H.IParam () (a :: IPName) (b :: Type) :: Asst
-pattern EqualP a b = H.EqualP () (a :: Type) (b :: Type) :: Asst
 pattern ParenA a = H.ParenA () (a :: Asst) :: Asst
-pattern WildCardA a = H.WildCardA () (a :: (Maybe Name)) :: Asst
 
 -- ** `H.Literal`
 
@@ -547,6 +544,7 @@ pattern XAttr a b = H.XAttr () (a :: XName) (b :: Exp) :: XAttr
 -- ** `H.Bracket`
 type Bracket = H.Bracket ()
 pattern ExpBracket a = H.ExpBracket () (a :: Exp) :: Bracket
+pattern TExpBracket a = H.TExpBracket () (a :: Exp) :: Bracket
 pattern PatBracket a = H.PatBracket () (a :: Pat) :: Bracket
 pattern TypeBracket a = H.TypeBracket () (a :: Type) :: Bracket
 pattern DeclBracket a = H.DeclBracket () (a :: [Decl]) :: Bracket
@@ -554,7 +552,9 @@ pattern DeclBracket a = H.DeclBracket () (a :: [Decl]) :: Bracket
 -- ** `H.Splice`
 type Splice = H.Splice ()
 pattern IdSplice a = H.IdSplice () (a :: String) :: Splice
+pattern TIdSplice a = H.TIdSplice () (a :: String) :: Splice
 pattern ParenSplice a = H.ParenSplice () (a :: Exp) :: Splice
+pattern TParenSplice a = H.TParenSplice () (a :: Exp) :: Splice
 
 -- ** `H.Safety`
 type Safety = H.Safety ()

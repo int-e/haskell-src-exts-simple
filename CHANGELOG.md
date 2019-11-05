@@ -1,5 +1,9 @@
 # Revision history for haskell-src-exts-simple
 
+## 1.22.0.0    -- 2019-11-05
+
+* support haskell-src-exts 1.22.0
+
 ## 1.21.0.1    -- 2019-09-13
 
 * support haskell-src-exts 1.21.1
