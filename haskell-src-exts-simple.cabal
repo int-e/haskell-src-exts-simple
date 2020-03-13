@@ -10,7 +10,7 @@ license:             MIT
 license-file:        LICENSE
 author:              Bertram Felgenhauer
 maintainer:          Bertram Felgenhauer <int-e@gmx.de>
-copyright:           2016, Bertram Felgenhauer
+copyright:           2016-2020, Bertram Felgenhauer
 category:            Development
 build-type:          Simple
 extra-source-files:
