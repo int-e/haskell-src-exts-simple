@@ -485,6 +485,7 @@ pattern LeftArrApp a b = H.LeftArrApp () (a :: Exp) (b :: Exp) :: Exp
 pattern RightArrApp a b = H.RightArrApp () (a :: Exp) (b :: Exp) :: Exp
 pattern LeftArrHighApp a b = H.LeftArrHighApp () (a :: Exp) (b :: Exp) :: Exp
 pattern RightArrHighApp a b = H.RightArrHighApp () (a :: Exp) (b :: Exp) :: Exp
+pattern ArrOp a = H.ArrOp () (a :: Exp) :: Exp
 pattern LCase a = H.LCase () (a :: [Alt]) :: Exp
 
 -- ** `H.XName`
