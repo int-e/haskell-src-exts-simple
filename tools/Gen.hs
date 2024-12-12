@@ -39,7 +39,34 @@ decl_ (DataDecl _ _ _ (DHApp _ (DHead _ (Ident _ n)) (UnkindedVar _ (Ident _ "l"
     ["-- ** `H." ++ n ++ "`",
      "type " ++ n ++ " = H." ++ n ++ " ()"] ++
     (dcons >>= qualConDecl_ n) ++
+    [""] ++
+    ["#if MIN_VERSION_GLASGOW_HASKELL(8,2,1,0)"] ++
+    ("{-# COMPLETE " : repeat "             ")
+      `zipStrs` chunkedConstructors
+      `zipStrs` (replicate (length chunkedConstructors - 1) "," ++ [" #-}"]) ++
+    ["#endif"] ++
     [""]
+  where
+    zipStrs = zipWith (++)
+
+    chunkedConstructors
+      = map (intercalate ", ")
+      $ splitWithMaxLen 75
+      $ map getConstructor
+      $ dcons
+
+    getConstructor (QualConDecl _ _ _ decl) = case decl of
+      ConDecl _ (Ident _ n') _ -> n'
+      RecDecl _ (Ident _ n') _ -> n'
+      _ -> error "Unexpected ConDecl constructor"
+
+    splitWithMaxLen maxLen = reverse . foldl' f []
+      where
+        f [] word = [[word]]
+        f (strs:strss) word
+          | sum (map ((+ 2) . length) (word : strs)) <= maxLen = (strs ++ [word]) : strss
+          | otherwise = [word] : strs : strss
+
 decl_ (DataDecl _ _ _ dhead dcons _) =
     ["-- skipped: data " ++ prettyPrint dhead,
      ""]
@@ -61,7 +88,6 @@ decl_ (ClassDecl _ _ head _ _) =
     ["-- skipped: class " ++ prettyPrint head, ""]
 decl_ InstDecl{} = []
 decl_ e = error $ prettyPrint e
-
 
 qualConDecl_ t' (QualConDecl _ _ _ (ConDecl _ (Ident _ n) (TyVar _ (Ident _ "l") : ts))) =
     ["pattern " ++ n ++ vars ts ++ " = H." ++ n ++ " ()" ++ vars' ts ++ " :: " ++ t']
