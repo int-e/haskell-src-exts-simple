@@ -34,17 +34,33 @@ pattern ListOf a <- H.ListOf _ a
 listOf :: [a] -> ListOf a
 listOf a = H.ListOf H.noSrcSpan a
 
+#if MIN_VERSION_GLASGOW_HASKELL(8,2,1,0)
+{-# COMPLETE ListOf #-}
+#endif
+
 -- ** `H.PragmasAndModuleName`
 type PragmasAndModuleName = H.PragmasAndModuleName ()
 pattern PragmasAndModuleName a b = H.PragmasAndModuleName () (a :: [ModulePragma]) (b :: Maybe ModuleName) :: PragmasAndModuleName
+
+#if MIN_VERSION_GLASGOW_HASKELL(8,2,1,0)
+{-# COMPLETE PragmasAndModuleName #-}
+#endif
 
 -- ** `H.PragmasAndModuleHead`
 type PragmasAndModuleHead = H.PragmasAndModuleHead ()
 pattern PragmasAndModuleHead a b = H.PragmasAndModuleHead () (a :: [ModulePragma]) (b :: Maybe ModuleHead)
 
+#if MIN_VERSION_GLASGOW_HASKELL(8,2,1,0)
+{-# COMPLETE PragmasAndModuleHead #-}
+#endif
+
 -- ** `H.ModuleHeadAndImports`
 type ModuleHeadAndImports = H.ModuleHeadAndImports ()
 pattern ModuleHeadAndImports a b c = H.ModuleHeadAndImports () (a :: [ModulePragma]) (b :: Maybe ModuleHead) (c :: [ImportDecl])
+
+#if MIN_VERSION_GLASGOW_HASKELL(8,2,1,0)
+{-# COMPLETE ModuleHeadAndImports #-}
+#endif
 
 -- * Functions
 
