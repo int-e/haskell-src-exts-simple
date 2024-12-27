@@ -51,3 +51,7 @@ parseFileContentsWithExts e =
 parseFileContentsWithMode :: ParseMode -> String -> ParseResult Module
 parseFileContentsWithMode m =
     fmap (fmap (const ())) . H.parseFileContentsWithMode m
+
+-- omitted: parseFileWithComments :: ParseMode -> FilePath -> IO (ParseResult (Module, [Comment]))
+-- omitted: parseFileWithCommentsAndPragmas :: ParseMode -> FilePath -> IO (ParseResult (Module, [Comment], [UnknownPragma]))
+-- omitted: parseFileContentsWithComments :: ParseMode -> String -> ParseResult (Module, [Comment])

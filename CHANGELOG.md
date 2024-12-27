@@ -1,5 +1,9 @@
 # Revision history for haskell-src-exts-simple
 
+## 1.23.1.0    - 2024-12-27
+
+* add COMPLETE pragmas (courtesy of @ratherforky)
+
 ## 1.23.0.0    — 2020-03-13
 
 * support haskell-src-exts 1.23.0

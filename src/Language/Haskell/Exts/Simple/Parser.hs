@@ -70,6 +70,9 @@ parse = fmap (fmap (const () :: H.SrcSpanInfo -> ())) . H.parse
 parseWithMode :: (Parseable (ast H.SrcSpanInfo), Functor ast) => ParseMode -> String -> ParseResult (ast ())
 parseWithMode m = fmap (fmap (const () :: H.SrcSpanInfo -> ())) . H.parseWithMode m
 
+parseWithComments :: (Parseable (ast H.SrcSpanInfo), Functor ast) => ParseMode -> String -> ParseResult (ast (), [Comment])
+parseWithComments m = fmap (first (fmap (const () :: H.SrcSpanInfo -> ()))) . H.parseWithComments m
+
 parseModule :: String -> ParseResult Module
 parseModule = fmap (fmap (const ())) . H.parseModule
 

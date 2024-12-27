@@ -1,5 +1,5 @@
 name:                haskell-src-exts-simple
-version:             1.23.0.0
+version:             1.23.1.0
 synopsis:            A simplified view on the haskell-src-exts AST
 description:
     This package provides a shim for haskell-src-exts (HSE), exposing the
@@ -10,7 +10,7 @@ license:             MIT
 license-file:        LICENSE
 author:              Bertram Felgenhauer
 maintainer:          Bertram Felgenhauer <int-e@gmx.de>
-copyright:           2016-2020, Bertram Felgenhauer
+copyright:           2016-2024, Bertram Felgenhauer
 category:            Development
 build-type:          Simple
 extra-source-files:
